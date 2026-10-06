@@ -1,0 +1,9 @@
+.env*
+!.env.example
+node_modules/
+vendor/
+*.sql
+*.zip
+*.log
+.DS_Store
+vendor-zips/
