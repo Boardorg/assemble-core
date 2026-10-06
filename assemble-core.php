@@ -16,3 +16,4 @@ define( 'ASSEMBLE_CORE_DIR', plugin_dir_path( __FILE__ ) );
 require_once ASSEMBLE_CORE_DIR . 'inc/environment.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/noindex.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/content-guards.php';
+require_once ASSEMBLE_CORE_DIR . 'inc/site-settings.php';
