@@ -1,0 +1,298 @@
+{
+    "key": "group_assemble_site_settings",
+    "title": "Site Settings",
+    "fields": [
+        {
+            "key": "field_assemble_tab_banner",
+            "label": "Announcement banner",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_banner_enabled",
+            "label": "Show the banner",
+            "name": "banner_enabled",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "ui": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_assemble_banner_text",
+            "label": "Banner text",
+            "name": "banner_text",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "maxlength": 140
+        },
+        {
+            "key": "field_assemble_banner_url",
+            "label": "Banner link",
+            "name": "banner_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_tab_header",
+            "label": "Header and account",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_sign_in_url",
+            "label": "“Sign in” link",
+            "name": "sign_in_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/login/"
+        },
+        {
+            "key": "field_assemble_create_account_url",
+            "label": "“Create free account” link",
+            "name": "create_account_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/register/"
+        },
+        {
+            "key": "field_assemble_tab_footer",
+            "label": "Footer",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_footer_cta_text",
+            "label": "Create-account line (logged-out footer)",
+            "name": "footer_cta_text",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "Get the latest Insights from peers who share your role."
+        },
+        {
+            "key": "field_assemble_footer_columns",
+            "label": "Link columns",
+            "name": "footer_columns",
+            "type": "repeater",
+            "instructions": "Leave empty to use the built-in four columns. Each column has a heading and links; a link with no URL shows as plain text.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 4,
+            "button_label": "Add column",
+            "collapsed": "field_assemble_footer_heading",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_footer_heading",
+                    "label": "Heading",
+                    "name": "heading",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_footer_links",
+                    "label": "Links",
+                    "name": "links",
+                    "type": "repeater",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "table",
+                    "button_label": "Add link",
+                    "sub_fields": [
+                        {
+                            "key": "field_assemble_footer_link_label",
+                            "label": "Label",
+                            "name": "label",
+                            "type": "text",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            }
+                        },
+                        {
+                            "key": "field_assemble_footer_link_url",
+                            "label": "URL",
+                            "name": "url",
+                            "type": "text",
+                            "instructions": "https://… or /path/",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_tab_links",
+            "label": "Links",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_how_it_works_url",
+            "label": "“How Assemble creates peer intelligence” link (homepage)",
+            "name": "how_it_works_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/about-us/"
+        },
+        {
+            "key": "field_assemble_communities_url",
+            "label": "Communities index link",
+            "name": "communities_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/field-reports/"
+        },
+        {
+            "key": "field_assemble_benchmark_url",
+            "label": "Benchmark reports app",
+            "name": "benchmark_url",
+            "type": "text",
+            "instructions": "A full URL (https://…) or a path on this site starting with / (e.g. /about-us/). Leave empty to use the built-in default.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "https://report.theassemble.com/"
+        },
+        {
+            "key": "field_assemble_tab_sharing",
+            "label": "Sharing",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_default_share_image",
+            "label": "Default share image",
+            "name": "default_share_image",
+            "type": "image",
+            "instructions": "Used when a page has no image of its own. 1200×630 works best.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "assemble-site-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "seamless",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Strings and links that change without a code deploy. Read by assemble_site_setting(); empty fields use the defaults in assemble-core/inc/site-settings.php.",
+    "show_in_rest": 0,
+    "modified": 1791343756
+}
