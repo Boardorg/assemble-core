@@ -4,7 +4,7 @@
  *
  * The Executive Platforms sites stay the source of truth for summit facts until
  * their editing workflow moves. This copies the public summit list into an
- * option, on demand (`wp assemble summits refresh`), and never writes to EP:
+ * option, daily and on demand (`wp assemble summits refresh`), and never writes to EP:
  *
  *   - executiveplatforms.com/summits/ (EP's [summits] shortcode): code, title,
  *     start month.day under a year heading, city, wordmark logo, register link;
@@ -24,6 +24,8 @@ defined( 'ABSPATH' ) || exit;
 
 const ASSEMBLE_SUMMITS_OPTION = 'assemble_ep_summits';
 const ASSEMBLE_SUMMITS_SOURCE = 'https://www.executiveplatforms.com/summits/';
+const ASSEMBLE_SUMMITS_STATUS_OPTION = 'assemble_ep_summits_status';
+const ASSEMBLE_SUMMITS_CRON = 'assemble_summits_daily_refresh';
 
 /**
  * Summits from the last good refresh, soonest first.
@@ -117,6 +119,88 @@ function assemble_summits_refresh( bool $dry_run = false ): array {
 
 	return $result;
 }
+
+/**
+ * Refresh and record the outcome for the admin notice. Used by the daily
+ * schedule and the CLI; a dry run records nothing.
+ *
+ * @return array Same shape as assemble_summits_refresh().
+ */
+function assemble_summits_refresh_and_record( bool $dry_run = false ): array {
+	$result = assemble_summits_refresh( $dry_run );
+
+	if ( ! $dry_run ) {
+		update_option(
+			ASSEMBLE_SUMMITS_STATUS_OPTION,
+			[
+				'at'       => wp_date( 'Y-m-d H:i' ),
+				'ok'       => $result['ok'],
+				'error'    => $result['error'],
+				'warnings' => $result['warnings'],
+			],
+			false
+		);
+	}
+
+	return $result;
+}
+
+/*
+ * Daily refresh (Cale, 2026-10-09). WP-Cron runs on site traffic, so "daily" is
+ * approximate. A failed run keeps the last good copy and raises the notice below.
+ */
+add_action( ASSEMBLE_SUMMITS_CRON, static fn() => assemble_summits_refresh_and_record() );
+
+add_action(
+	'init',
+	static function (): void {
+		if ( ! wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', ASSEMBLE_SUMMITS_CRON );
+		}
+	}
+);
+
+/**
+ * Why the stored summits may be stale, or '' when all is well: the last refresh
+ * failed, or nothing has refreshed for three days.
+ */
+function assemble_summits_problem(): string {
+	$status = (array) get_option( ASSEMBLE_SUMMITS_STATUS_OPTION, [] );
+	$last   = assemble_summits_refreshed_at();
+
+	if ( isset( $status['ok'] ) && ! $status['ok'] ) {
+		return sprintf(
+			/* translators: 1: date and time, 2: error message, 3: date and time of the last good copy. */
+			__( 'The summits refresh from executiveplatforms.com failed on %1$s: %2$s The site is showing the copy from %3$s.', 'assemble-core' ),
+			$status['at'],
+			rtrim( (string) $status['error'], '.' ) . '.',
+			'' !== $last ? $last : __( 'never', 'assemble-core' )
+		);
+	}
+
+	if ( '' !== $last && strtotime( $last ) < strtotime( wp_date( 'Y-m-d H:i' ) ) - 3 * DAY_IN_SECONDS ) {
+		/* translators: %s: date and time. */
+		return sprintf( __( 'Summits were last refreshed from executiveplatforms.com on %s. Check that WP-Cron is running.', 'assemble-core' ), $last );
+	}
+
+	return '';
+}
+
+add_action(
+	'admin_notices',
+	static function (): void {
+		$problem = current_user_can( 'manage_options' ) ? assemble_summits_problem() : '';
+
+		if ( '' !== $problem ) {
+			printf(
+				'<div class="notice notice-warning"><p><strong>%1$s</strong> %2$s %3$s</p></div>',
+				esc_html__( 'Assemble summits:', 'assemble-core' ),
+				esc_html( $problem ),
+				esc_html__( 'To retry: wp assemble summits refresh', 'assemble-core' )
+			);
+		}
+	}
+);
 
 /**
  * The venue name from a home page line: "Venue | City (Area), ST", "Venue, City, ST"
@@ -315,7 +399,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		 *     wp assemble summits refresh --dry-run
 		 */
 		public function refresh( array $args, array $assoc ): void {
-			$result = assemble_summits_refresh( isset( $assoc['dry-run'] ) );
+			$result = assemble_summits_refresh_and_record( isset( $assoc['dry-run'] ) );
 
 			foreach ( $result['warnings'] as $warning ) {
 				WP_CLI::warning( $warning );
@@ -340,6 +424,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		public function list( array $args, array $assoc ): void {
 			self::table( assemble_summits( ! isset( $assoc['all'] ) ) );
 			WP_CLI::line( 'Last refreshed: ' . ( assemble_summits_refreshed_at() ?: 'never' ) );
+			WP_CLI::line( 'Next scheduled refresh: ' . ( wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ) ? wp_date( 'Y-m-d H:i', (int) wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ) ) : 'none' ) );
+
+			$problem = assemble_summits_problem();
+			if ( '' !== $problem ) {
+				WP_CLI::warning( $problem );
+			}
 		}
 
 		private static function table( array $summits ): void {

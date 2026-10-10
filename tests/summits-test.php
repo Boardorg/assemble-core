@@ -64,7 +64,8 @@ add_filter(
 	3
 );
 
-$as_saved = get_option( ASSEMBLE_SUMMITS_OPTION, null );
+$as_saved        = get_option( ASSEMBLE_SUMMITS_OPTION, null );
+$as_saved_status = get_option( ASSEMBLE_SUMMITS_STATUS_OPTION, null );
 
 try {
 	// 1. Date ranges.
@@ -120,11 +121,35 @@ try {
 	delete_option( ASSEMBLE_SUMMITS_OPTION );
 	$r = assemble_summits_refresh( true );
 	as_check( $r['ok'] && ! $r['stored'] && false === get_option( ASSEMBLE_SUMMITS_OPTION ), 'dry run: nothing stored' );
+
+	// 8. Extras merge in without overriding EP's facts; an unmapped summit falls back.
+	assemble_summits_refresh();
+	$as_extras = static fn() => [
+		'aaa' => [ 'area' => 'finance', 'area_label' => 'Finance', 'communities' => [ '*' ], 'blurb' => 'One line.', 'logo' => 'summits/aaa.png', 'title' => 'Not EP' ],
+	];
+	add_filter( 'assemble/summit_extras', $as_extras );
+	$by = array_column( assemble_summits_with_extras( false ), null, 'code' );
+	remove_filter( 'assemble/summit_extras', $as_extras );
+	as_check( 'finance' === $by['aaa']['area'] && 'One line.' === $by['aaa']['blurb'] && [ '*' ] === $by['aaa']['communities'], 'extras: merged' );
+	as_check( 'Test Summit – Fall Edition' === $by['aaa']['title'], 'extras: never override an EP fact' );
+	as_check( content_url( 'assets/summits/aaa.png' ) === $by['aaa']['logo'], 'extras: logo from the shared image library' );
+	as_check( '' === $by['bbb']['area'] && '' === $by['bbb']['blurb'] && [] === $by['bbb']['communities'] && '' === $by['bbb']['logo'], 'extras: unmapped summit falls back' );
+	as_check( isset( assemble_summit_extras()['nasrsf'], assemble_summit_extras()['namesf'] ) && 16 === count( assemble_summit_extras() ), 'extras: all 16 EP codes mapped' );
+
+	// 9. The outcome is recorded for the admin notice.
+	assemble_summits_refresh_and_record();
+	as_check( '' === assemble_summits_problem(), 'status: a good refresh raises no notice' );
+	unset( $GLOBALS['as_t']['pages']['https://www.executiveplatforms.com/summits/'] );
+	assemble_summits_refresh_and_record();
+	as_check( str_contains( assemble_summits_problem(), 'failed' ), 'status: a failed refresh raises the notice' );
+	as_check( (bool) wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ), 'status: the daily refresh is scheduled' );
 } finally {
-	if ( null === $as_saved ) {
-		delete_option( ASSEMBLE_SUMMITS_OPTION );
-	} else {
-		update_option( ASSEMBLE_SUMMITS_OPTION, $as_saved, false );
+	foreach ( [ ASSEMBLE_SUMMITS_OPTION => $as_saved, ASSEMBLE_SUMMITS_STATUS_OPTION => $as_saved_status ] as $as_option => $as_value ) {
+		if ( null === $as_value ) {
+			delete_option( $as_option );
+		} else {
+			update_option( $as_option, $as_value, false );
+		}
 	}
 }
 
