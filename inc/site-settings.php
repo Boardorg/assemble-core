@@ -24,9 +24,16 @@ function assemble_site_setting_defaults(): array {
 		'banner_text'        => '',
 		'banner_url'         => '',
 
-		// Masthead account actions.
+		// Account pages (Phase 7). SSO may point these elsewhere later.
 		'sign_in_url'        => '/login/',
 		'create_account_url' => '/register/',
+		'account_url'        => '/account/',
+		// Linked from the Create account consent line.
+		'privacy_url'        => '/policies/',
+		// Where a signed-in free account goes from a members-only report's gate.
+		'membership_url'     => '/contact-us/',
+		// Free-read meter: full Public reports a signed-out visitor reads per 8 hours.
+		'free_reads'         => 2,
 
 		// Logged-out footer row above the columns (guide Draft 0.4).
 		'footer_cta_text'    => 'Get the latest Insights from peers who share your role.',

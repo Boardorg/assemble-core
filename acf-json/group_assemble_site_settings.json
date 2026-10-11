@@ -94,6 +94,71 @@
             "placeholder": "/register/"
         },
         {
+            "key": "field_assemble_account_url",
+            "label": "“Account” link (signed in)",
+            "name": "account_url",
+            "type": "text",
+            "instructions": "Default: /account/. The page where a signed-in person edits their details and follows.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/account/"
+        },
+        {
+            "key": "field_assemble_privacy_url",
+            "label": "Privacy link (Create account consent line)",
+            "name": "privacy_url",
+            "type": "text",
+            "instructions": "Default: /policies/.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/policies/"
+        },
+        {
+            "key": "field_assemble_membership_url",
+            "label": "Membership link (members-only reports, signed in)",
+            "name": "membership_url",
+            "type": "text",
+            "instructions": "Where a signed-in free account goes from a members-only Field Report. Default: /contact-us/.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/contact-us/"
+        },
+        {
+            "key": "field_assemble_free_reads",
+            "label": "Free reads before the create-account prompt",
+            "name": "free_reads",
+            "type": "number",
+            "instructions": "Full Public Field Reports a signed-out visitor can read per 8 hours. Default: 2.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "2",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "append": "",
+            "prepend": ""
+        },
+        {
             "key": "field_assemble_tab_footer",
             "label": "Footer",
             "name": "",
@@ -294,5 +359,5 @@
     "active": true,
     "description": "Strings and links that change without a code deploy. Read by assemble_site_setting(); empty fields use the defaults in assemble-core/inc/site-settings.php.",
     "show_in_rest": 0,
-    "modified": 1791343756
+    "modified": 1791739456
 }

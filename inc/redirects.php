@@ -7,8 +7,9 @@
  * versioned here, so it travels with the launch copy. Paths are matched without
  * a trailing slash and case-insensitively; the query string is passed on.
  *
- * Not here on purpose: the benchmark pages (decision #10) and the Ultimate
- * Member pages (Phase 7).
+ * Not here on purpose: the benchmark pages (decision #10), except /my-report/,
+ * and /login/, /register/ and /account/, which Phase 7 rebuilt at the same URLs.
+ * /logout/ is a handler (inc/account-forms.php), not a redirect.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +36,14 @@ function assemble_redirect_map(): array {
 		'/user-2'                                                      => '/',
 		'/account-2'                                                   => '/',
 		'/redirection-for-non-registered-users'                        => '/',
+		// Ultimate Member pages (Phase 7): the new account flow.
+		'/password-reset'                                              => assemble_account_url( 'lostpassword' ),
+		'/account-confirmation'                                        => assemble_account_url( 'account' ),
+		'/user'                                                        => assemble_account_url( 'account' ),
+		'/members'                                                     => assemble_account_url( 'account' ),
+		'/networking-profile'                                          => assemble_account_url( 'account' ),
+		// The old benchmark "My report" is handled on the benchmark site now (Cale, 2026-10-11).
+		'/my-report'                                                   => (string) assemble_site_setting( 'benchmark_url' ),
 	];
 
 	/**

@@ -4,7 +4,7 @@
  * (local, the beta, a clean copy at launch). Idempotent: it creates what's
  * missing and never overwrites what exists, so a second run changes nothing.
  *
- *   wp assemble setup [--dry-run] [--content-dir=<dir>] [--adopt-elementor]
+ *   wp assemble setup [--dry-run] [--content-dir=<dir>] [--adopt-elementor] [--adopt-um]
  *
  * Page copy is content, not code, so it isn't in this public repo: a new page
  * gets a one-line placeholder, or <dir>/<slug>.html when --content-dir is given
@@ -15,6 +15,11 @@
  * an Elementor page (`_elementor_edit_mode = builder`) with its file, resets
  * its template and sentence-cases its title. WordPress keeps the old content as
  * a revision, and the page is marked so it is adopted only once.
+ *
+ * The account pages (Sign in, Create account, Account; Phase 7) are created
+ * empty: their templates render the forms. --adopt-um empties an account page
+ * that still holds an Ultimate Member shortcode and retitles it, once (the old
+ * content stays as a revision).
  *
  * The footer stays on Site Settings → Footer columns, so only the "primary"
  * menu is created.
@@ -42,6 +47,27 @@ function assemble_setup_pages(): array {
 			'policies'             => 'Privacy policy',
 		]
 	);
+}
+
+/**
+ * The account pages, at the paths of their Site Settings URLs (skipped when a
+ * URL points off this site, e.g. to SSO).
+ *
+ * @return array<string,string> Path => title.
+ */
+function assemble_setup_account_pages(): array {
+	$pages = [];
+	foreach ( [ 'sign_in_url' => 'Sign in', 'create_account_url' => 'Create a free account', 'account_url' => 'Your account' ] as $key => $title ) {
+		$url = (string) assemble_site_setting( $key );
+		if ( str_starts_with( $url, '/' ) ) {
+			$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
+			if ( '' !== $path ) {
+				$pages[ $path ] = $title;
+			}
+		}
+	}
+
+	return (array) apply_filters( 'assemble/setup_account_pages', $pages );
 }
 
 /**
@@ -97,7 +123,7 @@ const ASSEMBLE_SETUP_PRIMARY_MENU = 'Masthead';
  *
  * @return array<int,array{item:string,action:string,detail:string}>
  */
-function assemble_setup_run( bool $dry_run = false, string $content_dir = '', bool $adopt_elementor = false ): array {
+function assemble_setup_run( bool $dry_run = false, string $content_dir = '', bool $adopt_elementor = false, bool $adopt_um = false ): array {
 	$log = [];
 	$add = static function ( string $item, string $action, string $detail = '' ) use ( &$log ): void {
 		$log[] = compact( 'item', 'action', 'detail' );
@@ -109,10 +135,39 @@ function assemble_setup_run( bool $dry_run = false, string $content_dir = '', bo
 	// script; WP-CLI runs with no user, so kses would strip it.
 	kses_remove_filters();
 
-	foreach ( assemble_setup_pages() as $path => $title ) {
-		$file    = $content_dir ? $content_dir . str_replace( '/', '--', $path ) . '.html' : '';
-		$content = $file && is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file named on the command line.
-		$page    = get_page_by_path( $path );
+	$account_pages = assemble_setup_account_pages();
+
+	foreach ( assemble_setup_pages() + $account_pages as $path => $title ) {
+		$is_account = isset( $account_pages[ $path ] );
+		$file       = $content_dir && ! $is_account ? $content_dir . str_replace( '/', '--', $path ) . '.html' : '';
+		$content    = $file && is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file named on the command line.
+		$page       = get_page_by_path( $path );
+
+		if ( $page instanceof WP_Post && $is_account ) {
+			$is_um   = str_contains( $page->post_content, '[ultimatemember' );
+			$adopted = (bool) get_post_meta( $page->ID, ASSEMBLE_SETUP_MARKER, true );
+
+			if ( $adopt_um && $is_um && ! $adopted ) {
+				$add( "page /{$path}/", $dry_run ? 'would adopt' : 'adopted', "#{$page->ID}: Ultimate Member shortcode removed; old content kept as a revision" );
+				if ( ! $dry_run ) {
+					wp_update_post(
+						[
+							'ID'           => $page->ID,
+							'post_title'   => $title,
+							'post_content' => '',
+							'post_status'  => 'publish',
+						]
+					);
+					update_post_meta( $page->ID, '_wp_page_template', 'default' );
+					update_post_meta( $page->ID, ASSEMBLE_SETUP_MARKER, gmdate( 'c' ) );
+				}
+				continue;
+			}
+
+			$note = $is_um && ! $adopted ? 'still an Ultimate Member page (run with --adopt-um)' : '';
+			$add( "page /{$path}/", 'exists', trim( "#{$page->ID} {$page->post_status}. {$note}" ) );
+			continue;
+		}
 
 		if ( $page instanceof WP_Post ) {
 			$is_elementor = 'builder' === get_post_meta( $page->ID, '_elementor_edit_mode', true );
@@ -149,7 +204,7 @@ function assemble_setup_run( bool $dry_run = false, string $content_dir = '', bo
 			$parent_id = $parent instanceof WP_Post ? (int) $parent->ID : 0;
 		}
 
-		if ( '' === $content ) {
+		if ( '' === $content && ! $is_account ) {
 			$content = "<!-- wp:paragraph -->\n<p>Content to come.</p>\n<!-- /wp:paragraph -->";
 		}
 
@@ -248,6 +303,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		 * [--adopt-elementor]
 		 * : Replace the content of standard pages that are still Elementor pages with their file.
 		 *
+		 * [--adopt-um]
+		 * : Empty account pages that still hold an Ultimate Member shortcode (their templates render the forms).
+		 *
 		 * ## EXAMPLES
 		 *
 		 *     wp assemble setup --dry-run
@@ -263,7 +321,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 
 			$dry  = (bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'dry-run', false );
-			$rows = assemble_setup_run( $dry, $dir, (bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'adopt-elementor', false ) );
+			$rows = assemble_setup_run(
+				$dry,
+				$dir,
+				(bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'adopt-elementor', false ),
+				(bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'adopt-um', false )
+			);
 
 			WP_CLI\Utils\format_items( 'table', $rows, [ 'item', 'action', 'detail' ] );
 

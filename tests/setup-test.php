@@ -30,13 +30,16 @@ ast_check( '' === assemble_redirect_target( '/our-product/extra/' ), 'deeper pat
 ast_check( '' === assemble_redirect_target( '/' ), 'home is left alone' );
 ast_check( '' === assemble_redirect_target( '/about-us/' ), 'rebuilt pages are left alone' );
 ast_check( '' === assemble_redirect_target( '/benchmark/' ), 'benchmark pages are left alone (decision #10)' );
-ast_check( '' === assemble_redirect_target( '/login/' ), 'Ultimate Member pages are left alone (Phase 7)' );
+ast_check( '' === assemble_redirect_target( '/login/' ), 'the rebuilt Sign in page is not redirected (Phase 7)' );
+ast_check( str_contains( assemble_redirect_target( '/password-reset/' ), 'action=lostpassword' ), 'the old password reset goes to the Sign in page\'s reset state' );
+ast_check( assemble_account_url( 'account' ) === assemble_redirect_target( '/members/' ), 'old member URLs go to the Account page' );
+ast_check( '' === assemble_redirect_target( '/logout/' ), '/logout/ is a handler, not a redirect' );
 
 add_filter( 'assemble/redirects', static fn ( $map ) => $map + [ '/old-test' => '/new-test/' ] );
 ast_check( '/new-test/' === assemble_redirect_target( '/old-test/' ), 'the map is filterable' );
 
 // No redirect source is also a standard page setup creates.
-foreach ( array_keys( assemble_setup_pages() ) as $path ) {
+foreach ( array_keys( assemble_setup_pages() + assemble_setup_account_pages() ) as $path ) {
 	ast_check( '' === assemble_redirect_target( '/' . $path . '/' ), "setup page /{$path}/ is not redirected" );
 }
 
@@ -45,9 +48,10 @@ assemble_setup_run();
 $second  = assemble_setup_run();
 $changed = array_filter( $second, static fn ( $row ) => in_array( $row['action'], [ 'created', 'adopted', 'assigned', 'failed' ], true ) );
 ast_check( [] === $changed, 'a second run changes nothing' );
-foreach ( array_keys( assemble_setup_pages() ) as $path ) {
+foreach ( array_keys( assemble_setup_pages() + assemble_setup_account_pages() ) as $path ) {
 	ast_check( get_page_by_path( $path ) instanceof WP_Post, "page /{$path}/ exists" );
 }
+ast_check( 3 === count( assemble_setup_account_pages() ), 'three account pages (login, register, account)' );
 ast_check( ! empty( get_nav_menu_locations()['primary'] ), 'the primary location holds a menu' );
 
 $dry = assemble_setup_run( true );
