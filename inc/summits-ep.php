@@ -1,37 +1,38 @@
 <?php
 /**
- * Summits, read from executiveplatforms.com (interim, decided 2026-10-09).
+ * Summits, read from Executive Platforms' summit API (live 2026-10-15).
  *
- * The Executive Platforms sites stay the source of truth for summit facts until
- * their editing workflow moves. This copies the public summit list into an
- * option, daily and on demand (`wp assemble summits refresh`), and never writes to EP:
+ * The EP sites stay the source of truth for summit facts until their editing
+ * workflow moves. This copies EP's public summit index into an option, hourly
+ * and on demand (`wp assemble summits refresh`), and never writes to EP. API
+ * reference: the hub's EP-SUMMITS-API-SPEC.md.
  *
- *   - executiveplatforms.com/summits/ (EP's [summits] shortcode): code, title,
- *     start month.day under a year heading, city, wordmark logo, register link;
- *   - each summit's home page hero: the full date range ("April 5-7, 2027"), the
- *     venue line under it, and the stats counters.
+ * One request: GET /wp-json/ep/v1/summits?v=1, sent with the stored ETag, so an
+ * unchanged index comes back as a 304 with no body. Each summit's current
+ * edition is mapped into the stored shape the templates have read since 0.3.0.
  *
- * A refresh that parses badly keeps the last good copy: if the list comes back
- * empty or under half as long as before, nothing is replaced; a summit whose home
- * page can't be read keeps its previous details.
+ * A refresh that looks wrong keeps the last good copy: an unreachable API, a
+ * body that isn't the expected JSON, or a list that is empty or under half as
+ * long as before replaces nothing. A summit with no current edition or no start
+ * date is left out with a warning.
  *
- * Replace this with EP's own feed once their developer adds one (see the hub's
- * PHASE-5-HANDOFF.md), and with Contentful when summits move there. Templates read
- * only assemble_summits(), so swapping the source changes nothing else.
+ * Templates read only assemble_summits(), so moving summits to Contentful later
+ * changes nothing else. The full edition endpoint (agendas, streams, speakers)
+ * isn't read yet; summit pages on Assemble (5b) can read it the same way.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 const ASSEMBLE_SUMMITS_OPTION = 'assemble_ep_summits';
-const ASSEMBLE_SUMMITS_SOURCE = 'https://www.executiveplatforms.com/summits/';
+const ASSEMBLE_SUMMITS_API = 'https://www.executiveplatforms.com/wp-json/ep/v1/summits?v=1';
 const ASSEMBLE_SUMMITS_STATUS_OPTION = 'assemble_ep_summits_status';
-const ASSEMBLE_SUMMITS_CRON = 'assemble_summits_daily_refresh';
+const ASSEMBLE_SUMMITS_CRON = 'assemble_summits_refresh';
 
 /**
  * Summits from the last good refresh, soonest first.
  *
  * @param bool $upcoming_only Leave out summits whose end date has passed.
- * @return array<int,array{code:string,title:string,season:string,url:string,register_url:string,logo_url:string,city:string,state:string,venue:string,start:string,end:string,date_text:string,stats:array<string,string>}>
+ * @return array<int,array{code:string,short_name:string,title:string,season:string,url:string,register_url:string,agenda_url:string,api_url:string,logo_url:string,city:string,state:string,venue:string,start:string,end:string,timezone:string,status:string,year:int,modified:string,date_text:string,stats:array}>
  */
 function assemble_summits( bool $upcoming_only = true ): array {
 	$stored  = get_option( ASSEMBLE_SUMMITS_OPTION, [] );
@@ -59,47 +60,67 @@ function assemble_summits_refreshed_at(): string {
 	return (string) ( $stored['fetched_at'] ?? '' );
 }
 
+
 /**
- * Fetch EP's pages and replace the stored summits if the result looks sound.
+ * Read EP's summit index and replace the stored summits if the result looks sound.
  *
- * @param bool $dry_run Parse and report, store nothing.
- * @return array{ok:bool,stored:bool,summits:array,warnings:string[],error:string}
+ * @param bool $dry_run Fetch and map, store nothing (and skip the ETag, so the full list is shown).
+ * @return array{ok:bool,stored:bool,unchanged:bool,summits:array,warnings:string[],error:string}
  */
 function assemble_summits_refresh( bool $dry_run = false ): array {
-	$result = [ 'ok' => false, 'stored' => false, 'summits' => [], 'warnings' => [], 'error' => '' ];
+	$result = [ 'ok' => false, 'stored' => false, 'unchanged' => false, 'summits' => [], 'warnings' => [], 'error' => '' ];
+	$stored = get_option( ASSEMBLE_SUMMITS_OPTION, [] );
+	$before = is_array( $stored['summits'] ?? null ) ? $stored['summits'] : [];
+	$etag   = $dry_run ? '' : (string) ( $stored['etag'] ?? '' );
 
-	$list_html = assemble_summits_fetch( ASSEMBLE_SUMMITS_SOURCE );
-	if ( '' === $list_html ) {
-		$result['error'] = 'Could not fetch ' . ASSEMBLE_SUMMITS_SOURCE;
+	$response = wp_remote_get(
+		ASSEMBLE_SUMMITS_API,
+		[
+			'timeout'    => 20,
+			'user-agent' => 'AssembleSiteSummits/2.0 (+' . home_url( '/' ) . ')',
+			'headers'    => array_filter( [ 'Accept' => 'application/json', 'If-None-Match' => $etag ] ),
+		]
+	);
+
+	if ( is_wp_error( $response ) ) {
+		$result['error'] = 'Could not reach the EP summit API: ' . $response->get_error_message();
 		return $result;
 	}
 
-	$summits = assemble_summits_parse_list( $list_html );
-	$stored  = get_option( ASSEMBLE_SUMMITS_OPTION, [] );
-	$before  = is_array( $stored['summits'] ?? null ) ? $stored['summits'] : [];
-	$by_code = array_column( $before, null, 'code' );
+	$code = (int) wp_remote_retrieve_response_code( $response );
 
-	if ( ! $summits || count( $summits ) < count( $before ) / 2 ) {
-		$result['error'] = sprintf( 'The summits page parsed to %d summits (previously %d). Its layout may have changed; keeping the stored copy.', count( $summits ), count( $before ) );
+	// Unchanged since the last refresh: keep the stored list, note that it was checked.
+	if ( 304 === $code && $before ) {
+		$result = array_merge( $result, [ 'ok' => true, 'unchanged' => true, 'summits' => $before ] );
+		if ( ! $dry_run ) {
+			update_option( ASSEMBLE_SUMMITS_OPTION, array_merge( $stored, [ 'fetched_at' => wp_date( 'Y-m-d H:i' ) ] ), false );
+		}
 		return $result;
 	}
 
-	foreach ( $summits as &$summit ) {
-		$home    = assemble_summits_fetch( $summit['url'] );
-		$details = '' !== $home ? assemble_summits_parse_home( $home ) : [];
+	$body = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 
-		if ( ! $details || '' === $details['start'] ) {
-			$result['warnings'][] = sprintf( '%s: could not read the date range on its home page; kept the previous details.', $summit['code'] );
-			$details = array_intersect_key( $by_code[ $summit['code'] ] ?? [], array_flip( [ 'start', 'end', 'date_text', 'venue', 'stats' ] ) );
-		} elseif ( '' !== $summit['start'] && $details['start'] !== $summit['start'] ) {
-			$result['warnings'][] = sprintf( '%s: the list says %s, the home page says %s; using the home page.', $summit['code'], $summit['start'], $details['start'] );
+	if ( 200 !== $code || ! is_array( $body ) || ! is_array( $body['summits'] ?? null ) ) {
+		$result['error'] = sprintf( 'The EP summit API answered %d without a summits list. Keeping the stored copy.', $code );
+		return $result;
+	}
+
+	$summits = [];
+	foreach ( $body['summits'] as $item ) {
+		$summit = is_array( $item ) ? assemble_summits_from_api( $item ) : null;
+
+		if ( null === $summit ) {
+			$result['warnings'][] = sprintf( '%s: no current edition with a start date; left out.', is_array( $item ) ? (string) ( $item['code'] ?? '?' ) : '?' );
+			continue;
 		}
 
-		$summit = array_merge( $summit, array_filter( $details, static fn( $v ) => '' !== $v && [] !== $v ) );
-
-		$summit['venue'] = assemble_summits_venue_only( $summit['venue'], $summit['city'], $summit['state'] );
+		$summits[] = $summit;
 	}
-	unset( $summit );
+
+	if ( ! $summits || count( $summits ) < count( $before ) / 2 ) {
+		$result['error'] = sprintf( 'The EP summit API returned %d usable summits (previously %d). Keeping the stored copy.', count( $summits ), count( $before ) );
+		return $result;
+	}
 
 	$result['ok']      = true;
 	$result['summits'] = $summits;
@@ -108,9 +129,11 @@ function assemble_summits_refresh( bool $dry_run = false ): array {
 		update_option(
 			ASSEMBLE_SUMMITS_OPTION,
 			[
-				'fetched_at' => wp_date( 'Y-m-d H:i' ),
-				'source'     => ASSEMBLE_SUMMITS_SOURCE,
-				'summits'    => $summits,
+				'fetched_at'   => wp_date( 'Y-m-d H:i' ),
+				'source'       => ASSEMBLE_SUMMITS_API,
+				'generated_at' => (string) ( $body['generated_at'] ?? '' ),
+				'etag'         => (string) wp_remote_retrieve_header( $response, 'etag' ),
+				'summits'      => $summits,
 			],
 			false
 		);
@@ -121,7 +144,69 @@ function assemble_summits_refresh( bool $dry_run = false ): array {
 }
 
 /**
- * Refresh and record the outcome for the admin notice. Used by the daily
+ * The summit's display name. EP's `title` and `site_name` each name the edition
+ * for only some summits ("The Fall Edition of the North American HR Executive
+ * Summit" vs "North American HR Executive Summit - Fall Edition"; NAFES Spring
+ * the other way round), so take whichever ends in "… Edition", else `title`
+ * (which keeps subtitles such as FWS's). The dash before "Edition" is set as an
+ * en dash, as on EP's own pages.
+ */
+function assemble_summits_title( string $title, string $site_name ): string {
+	$edition = '/\s+[-–—]\s+((?:Spring|Fall)\s+Edition)$/u';
+	$name    = preg_match( $edition, $site_name ) ? $site_name : ( '' !== $title ? $title : $site_name );
+
+	return (string) preg_replace( $edition, ' – $1', $name );
+}
+
+/**
+ * One summit from the API index, in the stored shape, or null when it has no
+ * usable current edition. Missing values become '' rather than null.
+ *
+ * `logo_url` is EP's white wordmark (for dark backgrounds); the theme uses the
+ * colour logos from the shared image library instead. `date_text` and `stats`
+ * stay in the shape for older readers but are empty: the API has no stats
+ * counters, and dates are formatted from `start` and `end`.
+ */
+function assemble_summits_from_api( array $item ): ?array {
+	$edition = is_array( $item['current_edition'] ?? null ) ? $item['current_edition'] : [];
+	$venue   = is_array( $edition['venue'] ?? null ) ? $edition['venue'] : [];
+	$code    = sanitize_key( (string) ( $item['code'] ?? '' ) );
+	$start   = (string) ( $edition['start_date'] ?? '' );
+	$end     = (string) ( $edition['end_date'] ?? '' );
+	$is_date = static fn( string $d ): bool => (bool) preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d );
+	$text    = static fn( $v ): string => is_scalar( $v ) ? trim( (string) $v ) : '';
+	$url     = static fn( $v ): string => is_string( $v ) && str_starts_with( $v, 'https://' ) ? $v : '';
+
+	if ( '' === $code || ! $is_date( $start ) ) {
+		return null;
+	}
+
+	return [
+		'code'         => $code,
+		'short_name'   => $text( $item['short_name'] ?? '' ),
+		'title'        => assemble_summits_title( $text( $item['title'] ?? '' ), $text( $item['site_name'] ?? '' ) ),
+		'season'       => in_array( $item['season'] ?? '', [ 'spring', 'fall' ], true ) ? $item['season'] : '',
+		'url'          => $url( $item['url'] ?? '' ),
+		'register_url' => $url( $edition['register_url'] ?? '' ),
+		'agenda_url'   => ! empty( $edition['agenda_available'] ) ? $url( $edition['agenda_url'] ?? '' ) : '',
+		'api_url'      => $url( $item['api_url'] ?? '' ),
+		'logo_url'     => $url( $item['logo_white']['url'] ?? '' ),
+		'city'         => $text( $venue['city'] ?? '' ),
+		'state'        => $text( $venue['state'] ?? '' ),
+		'venue'        => $text( $venue['name'] ?? '' ),
+		'start'        => $start,
+		'end'          => $is_date( $end ) && $end >= $start ? $end : $start,
+		'timezone'     => $text( $edition['timezone'] ?? '' ),
+		'status'       => $text( $edition['status'] ?? '' ),
+		'year'         => (int) ( $edition['year'] ?? 0 ),
+		'modified'     => $text( $item['modified'] ?? '' ),
+		'date_text'    => '',
+		'stats'        => [],
+	];
+}
+
+/**
+ * Refresh and record the outcome for the admin notice. Used by the hourly
  * schedule and the CLI; a dry run records nothing.
  *
  * @return array Same shape as assemble_summits_refresh().
@@ -146,16 +231,26 @@ function assemble_summits_refresh_and_record( bool $dry_run = false ): array {
 }
 
 /*
- * Daily refresh (Cale, 2026-10-09). WP-Cron runs on site traffic, so "daily" is
- * approximate. A failed run keeps the last good copy and raises the notice below.
+ * Hourly refresh (Cale, 2026-10-15; daily before). Cheap: an unchanged index is a
+ * 304 with no body. WP-Cron runs on site traffic, so "hourly" is approximate. A
+ * failed run keeps the last good copy and raises the notice below. Sites that
+ * scheduled the old daily hook get it replaced.
  */
 add_action( ASSEMBLE_SUMMITS_CRON, static fn() => assemble_summits_refresh_and_record() );
 
 add_action(
 	'init',
 	static function (): void {
+		if ( wp_next_scheduled( 'assemble_summits_daily_refresh' ) ) {
+			wp_clear_scheduled_hook( 'assemble_summits_daily_refresh' );
+		}
+
+		if ( wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ) && 'hourly' !== wp_get_schedule( ASSEMBLE_SUMMITS_CRON ) ) {
+			wp_clear_scheduled_hook( ASSEMBLE_SUMMITS_CRON );
+		}
+
 		if ( ! wp_next_scheduled( ASSEMBLE_SUMMITS_CRON ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', ASSEMBLE_SUMMITS_CRON );
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', ASSEMBLE_SUMMITS_CRON );
 		}
 	}
 );
@@ -171,7 +266,7 @@ function assemble_summits_problem(): string {
 	if ( isset( $status['ok'] ) && ! $status['ok'] ) {
 		return sprintf(
 			/* translators: 1: date and time, 2: error message, 3: date and time of the last good copy. */
-			__( 'The summits refresh from executiveplatforms.com failed on %1$s: %2$s The site is showing the copy from %3$s.', 'assemble-core' ),
+			__( 'The summits refresh from the EP summit API failed on %1$s: %2$s The site is showing the copy from %3$s.', 'assemble-core' ),
 			$status['at'],
 			rtrim( (string) $status['error'], '.' ) . '.',
 			'' !== $last ? $last : __( 'never', 'assemble-core' )
@@ -180,7 +275,7 @@ function assemble_summits_problem(): string {
 
 	if ( '' !== $last && strtotime( $last ) < strtotime( wp_date( 'Y-m-d H:i' ) ) - 3 * DAY_IN_SECONDS ) {
 		/* translators: %s: date and time. */
-		return sprintf( __( 'Summits were last refreshed from executiveplatforms.com on %s. Check that WP-Cron is running.', 'assemble-core' ), $last );
+		return sprintf( __( 'Summits were last refreshed from the EP summit API on %s. Check that WP-Cron is running.', 'assemble-core' ), $last );
 	}
 
 	return '';
@@ -202,191 +297,15 @@ add_action(
 	}
 );
 
-/**
- * The venue name from a home page line: "Venue | City (Area), ST", "Venue, City, ST"
- * or "Venue, City ST" all become "Venue".
- */
-function assemble_summits_venue_only( string $line, string $city, string $state ): string {
-	if ( str_contains( $line, '|' ) ) {
-		return trim( explode( '|', $line, 2 )[0] );
-	}
-
-	if ( '' === $city ) {
-		return trim( $line );
-	}
-
-	$pattern = '/[\s,]*' . preg_quote( $city, '/' ) . '(\s*\([^)]*\))?(,?\s*' . preg_quote( $state, '/' ) . ')?\s*$/i';
-
-	return trim( (string) preg_replace( $pattern, '', $line ), " ,\t" );
-}
-
-/** GET a page from EP; '' on any failure. Identifies itself, follows redirects. */
-function assemble_summits_fetch( string $url ): string {
-	$response = wp_remote_get(
-		$url,
-		[
-			'timeout'    => 20,
-			'user-agent' => 'AssembleSiteSummits/1.0 (+' . home_url( '/' ) . ')',
-		]
-	);
-
-	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-		return '';
-	}
-
-	return (string) wp_remote_retrieve_body( $response );
-}
-
-/** An XPath over an HTML string, with libxml's warnings about real-world HTML silenced. */
-function assemble_summits_xpath( string $html ): DOMXPath {
-	$doc      = new DOMDocument();
-	$previous = libxml_use_internal_errors( true );
-	$doc->loadHTML( '<?xml encoding="UTF-8">' . $html, LIBXML_NONET );
-	libxml_clear_errors();
-	libxml_use_internal_errors( $previous );
-
-	return new DOMXPath( $doc );
-}
-
-/** XPath for elements carrying one class among others. */
-function assemble_summits_class( string $class ): string {
-	return sprintf( 'contains(concat(" ", normalize-space(@class), " "), " %s ")', $class );
-}
-
-/** Collapsed, decoded text of a node, or ''. */
-function assemble_summits_text( ?DOMNode $node ): string {
-	if ( ! $node ) {
-		return '';
-	}
-
-	// Collapse whitespace and drop zero-width characters left by the page builder.
-	$text = html_entity_decode( $node->textContent, ENT_QUOTES, 'UTF-8' );
-	$text = (string) preg_replace( '/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text );
-
-	return trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
-}
-
-/**
- * Parse EP's summits list page.
- *
- * @return array<int,array> One row per summit, details from the home page still empty.
- */
-function assemble_summits_parse_list( string $html ): array {
-	$xp      = assemble_summits_xpath( $html );
-	$summits = [];
-
-	foreach ( $xp->query( '//div[' . assemble_summits_class( 'summit-wrapper' ) . ']' ) as $group ) {
-		$year = assemble_summits_text( $xp->query( './/div[' . assemble_summits_class( 'summit-year' ) . ']', $group )->item( 0 ) );
-		if ( ! preg_match( '/^\d{4}$/', $year ) ) {
-			continue;
-		}
-
-		foreach ( $xp->query( './/div[' . assemble_summits_class( 'summit' ) . ']', $group ) as $card ) {
-			$link = $xp->query( './a[@href]', $card )->item( 0 );
-			$url  = $link instanceof DOMElement ? $link->getAttribute( 'href' ) : '';
-			$code = (string) ( preg_match( '#executiveplatforms\.com/([a-z0-9-]+)/?$#', $url, $m ) ? $m[1] : '' );
-
-			if ( '' === $code ) {
-				continue;
-			}
-
-			$title    = assemble_summits_text( $xp->query( './/div[' . assemble_summits_class( 'summit-title' ) . ']', $card )->item( 0 ) );
-			$md       = assemble_summits_text( $xp->query( './/div[' . assemble_summits_class( 'summit-date' ) . ']', $card )->item( 0 ) );
-			$place    = assemble_summits_text( $xp->query( './/div[' . assemble_summits_class( 'summit-venue' ) . ']', $card )->item( 0 ) );
-			$register = $xp->query( './/div[' . assemble_summits_class( 'summit-register-button' ) . ']//a[@href]', $card )->item( 0 );
-			$logo     = $xp->query( './/img', $card )->item( 0 );
-			$logo_url = $logo instanceof DOMElement ? ( $logo->getAttribute( 'data-src' ) ?: $logo->getAttribute( 'src' ) ) : '';
-			[ $city, $state ] = array_pad( array_map( 'trim', explode( ',', $place, 2 ) ), 2, '' );
-
-			$start = '';
-			if ( preg_match( '/^(\d{1,2})\.(\d{1,2})$/', $md, $m ) && checkdate( (int) $m[1], (int) $m[2], (int) $year ) ) {
-				$start = sprintf( '%04d-%02d-%02d', $year, $m[1], $m[2] );
-			}
-
-			$summits[] = [
-				'code'         => $code,
-				'title'        => $title,
-				'season'       => preg_match( '/\b(Spring|Fall)\s+Edition\b/i', $title, $s ) ? strtolower( $s[1] ) : '',
-				'url'          => $url,
-				'register_url' => $register instanceof DOMElement ? $register->getAttribute( 'href' ) : '',
-				'logo_url'     => str_starts_with( $logo_url, 'http' ) ? $logo_url : '',
-				'city'         => $city,
-				'state'        => $state,
-				'venue'        => '',
-				'start'        => $start,
-				'end'          => '',
-				'date_text'    => '',
-				'stats'        => [],
-			];
-		}
-	}
-
-	return $summits;
-}
-
-/**
- * Parse a summit home page's hero: the first heading that is a date range, the
- * heading after it (venue line), and the counters ("Attendees" => "500").
- *
- * @return array{start:string,end:string,date_text:string,venue:string,stats:array<string,string>}
- */
-function assemble_summits_parse_home( string $html ): array {
-	$xp      = assemble_summits_xpath( $html );
-	$out     = [ 'start' => '', 'end' => '', 'date_text' => '', 'venue' => '', 'stats' => [] ];
-	$heading = '//*[self::h1 or self::h2 or self::h3 or self::h4][' . assemble_summits_class( 'elementor-heading-title' ) . ']';
-	$nodes   = iterator_to_array( $xp->query( $heading ) );
-
-	foreach ( $nodes as $i => $node ) {
-		$range = assemble_summits_parse_range( assemble_summits_text( $node ) );
-		if ( $range ) {
-			$out = array_merge( $out, $range, [ 'date_text' => assemble_summits_text( $node ) ] );
-			$out['venue'] = assemble_summits_text( $nodes[ $i + 1 ] ?? null );
-			break;
-		}
-	}
-
-	foreach ( $xp->query( '//div[' . assemble_summits_class( 'elementor-counter' ) . ']' ) as $counter ) {
-		$title  = assemble_summits_text( $xp->query( './/*[' . assemble_summits_class( 'elementor-counter-title' ) . ']', $counter )->item( 0 ) );
-		$number = $xp->query( './/*[' . assemble_summits_class( 'elementor-counter-number' ) . ']', $counter )->item( 0 );
-		if ( '' !== $title && $number instanceof DOMElement && '' !== $number->getAttribute( 'data-to-value' ) ) {
-			$suffix                = assemble_summits_text( $xp->query( './/*[' . assemble_summits_class( 'elementor-counter-number-suffix' ) . ']', $counter )->item( 0 ) );
-			$out['stats'][ $title ] = $number->getAttribute( 'data-to-value' ) . $suffix;
-		}
-	}
-
-	return $out;
-}
-
-/**
- * "April 5-7, 2027", "September 30 - October 2, 2026", "November 16 - November 18, 2026".
- *
- * @return array{start:string,end:string}|null
- */
-function assemble_summits_parse_range( string $text ): ?array {
-	$month = '(January|February|March|April|May|June|July|August|September|October|November|December)';
-	$text  = str_replace( [ '–', '—' ], '-', $text );
-
-	// Month D[, YYYY] [- [Month] D], YYYY: the first year only appears when the range crosses into a new year.
-	if ( ! preg_match( "/^$month\\s+(\\d{1,2})(?:,\\s*(\\d{4}))?(?:\\s*-\\s*(?:$month\\s+)?(\\d{1,2}))?,\\s*(\\d{4})$/i", $text, $m ) ) {
-		return null;
-	}
-
-	$end_year   = $m[6];
-	$start_year = '' !== $m[3] ? $m[3] : $end_year;
-	$start      = strtotime( "{$m[1]} {$m[2]} $start_year" );
-	$end        = '' !== ( $m[5] ?? '' ) ? strtotime( ( '' !== $m[4] ? $m[4] : $m[1] ) . " {$m[5]} $end_year" ) : $start;
-
-	return $start && $end && $end >= $start ? [ 'start' => gmdate( 'Y-m-d', $start ), 'end' => gmdate( 'Y-m-d', $end ) ] : null;
-}
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Summits read from executiveplatforms.com (interim source).
+	 * Summits read from Executive Platforms' summit API.
 	 */
 	class Assemble_Summits_CLI {
 
 		/**
-		 * Re-read the summits from executiveplatforms.com and store them.
+		 * Re-read the summits from EP's summit API and store them.
 		 *
 		 * ## OPTIONS
 		 *
@@ -410,7 +329,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 
 			self::table( $result['summits'] );
-			WP_CLI::success( sprintf( '%d summits %s.', count( $result['summits'] ), $result['stored'] ? 'stored' : 'parsed (dry run, nothing stored)' ) );
+
+			if ( $result['unchanged'] ) {
+				WP_CLI::success( sprintf( 'Unchanged since the last refresh (304); %d summits kept.', count( $result['summits'] ) ) );
+				return;
+			}
+
+			WP_CLI::success( sprintf( '%d summits %s.', count( $result['summits'] ), $result['stored'] ? 'stored' : 'read (dry run, nothing stored)' ) );
 		}
 
 		/**
@@ -443,12 +368,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						'city'   => trim( $s['city'] . ', ' . $s['state'], ', ' ),
 						'venue'  => $s['venue'],
 						'season' => $s['season'],
-						'logo'   => '' !== $s['logo_url'] ? 'yes' : 'no',
+						'agenda' => '' !== ( $s['agenda_url'] ?? '' ) ? 'yes' : 'no',
 						'title'  => $s['title'],
 					],
 					$summits
 				),
-				[ 'code', 'start', 'end', 'city', 'venue', 'season', 'logo', 'title' ]
+				[ 'code', 'start', 'end', 'city', 'venue', 'season', 'agenda', 'title' ]
 			);
 		}
 	}

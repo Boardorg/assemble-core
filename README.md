@@ -44,20 +44,19 @@ One `team` post per person at `/our-team/<slug>/`, with `name`, `position` and `
 
 Tests (local): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/setup-test.php`
 
-## Summits (interim: read from executiveplatforms.com)
+## Summits (read from Executive Platforms' summit API)
 
-The Executive Platforms sites stay the source of truth for summit facts for now. `inc/summits-ep.php` copies the public summit list into the `assemble_ep_summits` option and never writes to EP:
-
-- `executiveplatforms.com/summits/`: code, title, start date, city, wordmark logo, register link;
-- each summit's home page hero: the full date range, the venue, the stats counters.
+The Executive Platforms sites stay the source of truth for summit facts. `inc/summits-ep.php` reads EP's public summit API (`https://www.executiveplatforms.com/wp-json/ep/v1/summits?v=1`, live since 2026-10-15; reference: the hub's `EP-SUMMITS-API-SPEC.md`) and copies each summit's current edition into the `assemble_ep_summits` option. It never writes to EP. Until 0.7.0 it read EP's web pages instead (17 requests); that code is gone.
 
 ```
 wp assemble summits refresh [--dry-run]
 wp assemble summits list [--all]
 ```
 
-It runs **daily** (WP-Cron, `assemble_summits_daily_refresh`, from 0.4.0) and on demand. A refresh that parses badly keeps the last good copy: an empty or much shorter list replaces nothing, and a summit whose home page can't be read keeps its previous details. Each run's outcome is stored in `assemble_ep_summits_status`; when the last run failed, or nothing has refreshed for three days, administrators see a notice in wp-admin and `wp assemble summits list` prints a warning. Templates read only `assemble_summits()` (upcoming, soonest first; filter `assemble/summits`), so the source can later become EP's own feed or Contentful without template changes.
+Per summit: `code`, `short_name`, `title`, `season`, `url`, `register_url`, `agenda_url` (once EP publishes the agenda), `api_url` (the full edition, for later), `logo_url` (EP's white wordmark), `city`, `state`, `venue`, `start`, `end`, `timezone`, `status`, `year`, `modified`. `date_text` and `stats` stay in the shape but are empty: the API has no stats counters, and the theme formats dates from `start` and `end`. The title is whichever of EP's `title` and `site_name` names the edition ("… – Fall Edition"), else `title`.
+
+It runs **hourly** (WP-Cron, `assemble_summits_refresh`; daily before 0.7.0, and the old daily hook is cleared on upgrade) and on demand: one request, sent with the stored `ETag`, so an unchanged list costs a 304 with no body. A refresh that looks wrong keeps the last good copy: an unreachable API, a body that isn't the expected JSON, or a list that's empty or under half as long as before replaces nothing; a summit with no current edition or start date is left out with a warning. Each run's outcome is stored in `assemble_ep_summits_status`; when the last run failed, or nothing has refreshed for three days, administrators see a notice in wp-admin and `wp assemble summits list` prints a warning. Templates read only `assemble_summits()` (upcoming, soonest first; filter `assemble/summits`).
 
 **Assemble-only extras** (`inc/summits-extras.php`, agreed with Cale 2026-10-09): what EP doesn't keep, per summit code. `area` (the `data-area` colour; '' renders neutral, as for Life Sciences), `area_label` (the eyebrow, in EP's practice areas), `communities` (Community slugs it's featured under; `['*']` for every Community in its area), `blurb` (the one-line card description) and `logo` (a colour logo in the shared image library, relative to `wp-content/assets/`). `assemble_summits_with_extras()` merges them in; an extra never overrides an EP fact, and an unmapped summit renders neutral with no blurb or logo. Change one without a commit through the `assemble/summit_extras` filter.
 
-Tests (local, offline against a fake EP): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/summits-test.php`
+Tests (local, offline against a fake EP API, 42 checks): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/summits-test.php`
