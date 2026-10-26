@@ -1,6 +1,6 @@
 <?php
 /**
- * Summits, from the shared summits engine in Assemble Content (1.10.0 or later).
+ * Summits, from the shared summits engine in Assemble Content (2.0.0 or later).
  *
  * The engine reads Executive Platforms' summit API and holds Assemble's own
  * extras per summit, for this site and the Member Center alike. These wrappers
@@ -16,7 +16,7 @@ const ASSEMBLE_SUMMITS_LEGACY_CRON          = 'assemble_summits_refresh';
 
 /** Is the shared summits engine active? */
 function assemble_has_summits_engine(): bool {
-	return class_exists( 'AFR_Summits' ) && class_exists( 'AFR_Summit_Extras' );
+	return class_exists( 'AC_Summits' ) && class_exists( 'AC_Summit_Extras' );
 }
 
 /**
@@ -26,7 +26,7 @@ function assemble_has_summits_engine(): bool {
  * @return array<int,array>
  */
 function assemble_summits( bool $upcoming_only = true ): array {
-	return assemble_has_summits_engine() ? AFR_Summits::all( $upcoming_only ) : [];
+	return assemble_has_summits_engine() ? AC_Summits::all( $upcoming_only ) : [];
 }
 
 /**
@@ -37,17 +37,17 @@ function assemble_summits( bool $upcoming_only = true ): array {
  * @return array<int,array>
  */
 function assemble_summits_with_extras( bool $upcoming_only = true ): array {
-	return assemble_has_summits_engine() ? AFR_Summits::with_extras( $upcoming_only ) : [];
+	return assemble_has_summits_engine() ? AC_Summits::with_extras( $upcoming_only ) : [];
 }
 
 /** The extras map, keyed by EP summit code. */
 function assemble_summit_extras(): array {
-	return assemble_has_summits_engine() ? AFR_Summit_Extras::all() : [];
+	return assemble_has_summits_engine() ? AC_Summit_Extras::all() : [];
 }
 
 /** When the summits were last refreshed (site timezone, 'Y-m-d H:i'), or ''. */
 function assemble_summits_refreshed_at(): string {
-	return assemble_has_summits_engine() ? AFR_Summits::refreshed_at() : '';
+	return assemble_has_summits_engine() ? AC_Summits::refreshed_at() : '';
 }
 
 /*
@@ -68,9 +68,9 @@ add_action(
 			return;
 		}
 
-		if ( is_array( $legacy['summits'] ?? null ) && $legacy['summits'] && ! get_option( AFR_Summits::OPTION ) ) {
+		if ( is_array( $legacy['summits'] ?? null ) && $legacy['summits'] && ! get_option( AC_Summits::OPTION ) ) {
 			unset( $legacy['etag'] );
-			update_option( AFR_Summits::OPTION, $legacy, false );
+			update_option( AC_Summits::OPTION, $legacy, false );
 		}
 
 		delete_option( ASSEMBLE_SUMMITS_LEGACY_OPTION );
@@ -82,9 +82,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	add_action(
 		'plugins_loaded',
 		static function (): void {
-			if ( class_exists( 'AFR_Summits_CLI' ) ) {
+			if ( class_exists( 'AC_Summits_CLI' ) ) {
 				// Old name for `wp assemble-content summits`.
-				WP_CLI::add_command( 'assemble summits', 'AFR_Summits_CLI' );
+				WP_CLI::add_command( 'assemble summits', 'AC_Summits_CLI' );
 			}
 		}
 	);

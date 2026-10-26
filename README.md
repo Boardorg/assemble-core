@@ -46,12 +46,12 @@ Tests (local): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assem
 
 ## Summits (from the shared engine in Assemble Content)
 
-Since 0.8.0 the summits reader lives in **Assemble Content 1.10.0** (`AFR_Summits`, `AFR_Summit_Extras`, `AFR_Summit_Editions`), so the Member Center can read the same data. See that plugin's README, "Summits". This plugin keeps only thin wrappers with the names the theme reads, in `inc/summits.php`:
+Since 0.8.0 the summits reader lives in **Assemble Content** (`AC_Summits`, `AC_Summit_Extras`, `AC_Summit_Editions`, named `AFR_*` before 2.0.0), so the Member Center can read the same data. See that plugin's README, "Summits". This plugin keeps only thin wrappers with the names the theme reads, in `inc/summits.php`:
 
 - `assemble_summits( $upcoming_only = true )`: upcoming summits, soonest first;
 - `assemble_summits_with_extras( $upcoming_only = true )`: the same, with Assemble's extras merged in;
 - `assemble_summit_extras()` and `assemble_summits_refreshed_at()`.
 
-Without Assemble Content 1.10.0 they return nothing, and the theme shows its empty states. On upgrade from 0.7.0, the stored copy in `assemble_ep_summits` seeds the engine's `afr_summits` option once; then the old option, its status option and the `assemble_summits_refresh` schedule are removed. `wp assemble summits refresh|list` still works, as an alias of `wp assemble-content summits`.
+Without Assemble Content 2.0.0 they return nothing, and the theme shows its empty states. On upgrade from 0.7.0, the stored copy in `assemble_ep_summits` seeds the engine's `ac_summits` option once; then the old option, its status option and the `assemble_summits_refresh` schedule are removed. `wp assemble summits refresh|list` still works, as an alias of `wp assemble-content summits`.
 
-Filters moved with the code: `assemble/summits` is now `afr_summits`, and `assemble/summit_extras` is now `afr_summit_extras`.
+Filters moved with the code: `assemble/summits` is now `ac_summits`, and `assemble/summit_extras` is now `ac_summit_extras`.
