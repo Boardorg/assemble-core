@@ -44,19 +44,14 @@ One `team` post per person at `/our-team/<slug>/`, with `name`, `position` and `
 
 Tests (local): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/setup-test.php`
 
-## Summits (read from Executive Platforms' summit API)
+## Summits (from the shared engine in Assemble Content)
 
-The Executive Platforms sites stay the source of truth for summit facts. `inc/summits-ep.php` reads EP's public summit API (`https://www.executiveplatforms.com/wp-json/ep/v1/summits?v=1`, live since 2026-10-15; reference: the hub's `EP-SUMMITS-API-SPEC.md`) and copies each summit's current edition into the `assemble_ep_summits` option. It never writes to EP. Until 0.7.0 it read EP's web pages instead (17 requests); that code is gone.
+Since 0.8.0 the summits reader lives in **Assemble Content** (`AC_Summits`, `AC_Summit_Extras`, `AC_Summit_Editions`, named `AFR_*` before 2.0.0), so the Member Center can read the same data. See that plugin's README, "Summits". This plugin keeps only thin wrappers with the names the theme reads, in `inc/summits.php`:
 
-```
-wp assemble summits refresh [--dry-run]
-wp assemble summits list [--all]
-```
+- `assemble_summits( $upcoming_only = true )`: upcoming summits, soonest first;
+- `assemble_summits_with_extras( $upcoming_only = true )`: the same, with Assemble's extras merged in;
+- `assemble_summit_extras()` and `assemble_summits_refreshed_at()`.
 
-Per summit: `code`, `short_name`, `title`, `season`, `url`, `register_url`, `agenda_url` (once EP publishes the agenda), `api_url` (the full edition, for later), `logo_url` (EP's white wordmark), `city`, `state`, `venue`, `start`, `end`, `timezone`, `status`, `year`, `modified`. `date_text` and `stats` stay in the shape but are empty: the API has no stats counters, and the theme formats dates from `start` and `end`. The title is whichever of EP's `title` and `site_name` names the edition ("… – Fall Edition"), else `title`.
+Without Assemble Content 2.0.0 they return nothing, and the theme shows its empty states. On upgrade from 0.7.0, the stored copy in `assemble_ep_summits` seeds the engine's `ac_summits` option once; then the old option, its status option and the `assemble_summits_refresh` schedule are removed. `wp assemble summits refresh|list` still works, as an alias of `wp assemble-content summits`.
 
-It runs **hourly** (WP-Cron, `assemble_summits_refresh`; daily before 0.7.0, and the old daily hook is cleared on upgrade) and on demand: one request, sent with the stored `ETag`, so an unchanged list costs a 304 with no body. A refresh that looks wrong keeps the last good copy: an unreachable API, a body that isn't the expected JSON, or a list that's empty or under half as long as before replaces nothing; a summit with no current edition or start date is left out with a warning. Each run's outcome is stored in `assemble_ep_summits_status`; when the last run failed, or nothing has refreshed for three days, administrators see a notice in wp-admin and `wp assemble summits list` prints a warning. Templates read only `assemble_summits()` (upcoming, soonest first; filter `assemble/summits`).
-
-**Assemble-only extras** (`inc/summits-extras.php`, agreed with Cale 2026-10-09): what EP doesn't keep, per summit code. `area` (the `data-area` colour; '' renders neutral, as for Life Sciences), `area_label` (the eyebrow, in EP's practice areas), `communities` (Community slugs it's featured under; `['*']` for every Community in its area), `blurb` (the one-line card description) and `logo` (a colour logo in the shared image library, relative to `wp-content/assets/`). `assemble_summits_with_extras()` merges them in; an extra never overrides an EP fact, and an unmapped summit renders neutral with no blurb or logo. Change one without a commit through the `assemble/summit_extras` filter.
-
-Tests (local, offline against a fake EP API, 42 checks): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/summits-test.php`
+Filters moved with the code: `assemble/summits` is now `ac_summits`, and `assemble/summit_extras` is now `ac_summit_extras`.
