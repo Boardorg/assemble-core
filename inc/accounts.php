@@ -8,7 +8,7 @@
  *   - assemble_user_audiences()   membership; filter `assemble/account/audiences` (SSO, the Member Center)
  *
  * The feed's gate is never rewritten: audiences reach it only through
- * `afr_current_audiences`. Until SSO, an admin-only "test audiences" field
+ * `ac_current_audiences`. Until SSO, an admin-only "test audiences" field
  * stands in, and it is ignored on theassemble.com.
  *
  * Forms and their handlers: inc/account-forms.php. The user screen:
@@ -206,8 +206,8 @@ function assemble_clean_areas( array $areas ): array {
  */
 function assemble_communities_by_area(): array {
 	$by_area = array_fill_keys( assemble_practice_area_keys(), [] );
-	if ( class_exists( 'AFR_Communities' ) ) {
-		foreach ( AFR_Communities::all() as $community ) {
+	if ( class_exists( 'AC_Communities' ) ) {
+		foreach ( AC_Communities::all() as $community ) {
 			$area = (string) ( $community['practice_area'] ?? '' );
 			if ( isset( $by_area[ $area ] ) && ! empty( $community['slug'] ) ) {
 				$by_area[ $area ][] = (string) $community['slug'];
@@ -231,7 +231,7 @@ function assemble_normalise_follows( array $areas, array $communities ): array {
 	$areas       = assemble_clean_areas( $areas );
 	$communities = array_values( array_unique( array_filter( array_map( static fn ( $c ) => sanitize_title( (string) $c ), $communities ) ) ) );
 
-	if ( class_exists( 'AFR_Communities' ) ) {
+	if ( class_exists( 'AC_Communities' ) ) {
 		$allowed = [];
 		foreach ( assemble_communities_by_area() as $area => $slugs ) {
 			if ( in_array( $area, $areas, true ) ) {
@@ -447,12 +447,12 @@ function assemble_test_audiences_enabled(): bool {
 }
 
 /**
- * Audience names the feed knows (AFR_Settings::audiences()), or none without it.
+ * Audience names the feed knows (AC_Settings::audiences()), or none without it.
  *
  * @return string[]
  */
 function assemble_known_audiences(): array {
-	return class_exists( 'AFR_Settings' ) ? array_values( (array) AFR_Settings::audiences() ) : [];
+	return class_exists( 'AC_Settings' ) ? array_values( (array) AC_Settings::audiences() ) : [];
 }
 
 /**
@@ -500,7 +500,7 @@ function assemble_user_audiences( int $user_id ): array {
  * preview in play; it already holds "Public" plus any role-mapped audiences.
  */
 add_filter(
-	'afr_current_audiences',
+	'ac_current_audiences',
 	static function ( array $audiences ): array {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
