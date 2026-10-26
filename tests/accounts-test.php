@@ -41,7 +41,7 @@ aat_check( 'email_invalid' === ( $codes['email'] ?? '' ) && 'name_empty' === ( $
 aat_check( '' !== assemble_account_message( 'email_exists' ), 'error codes have messages' );
 
 // Follows.
-$have_feed = class_exists( 'AFR_Communities' ) && AFR_Communities::all();
+$have_feed = class_exists( 'AC_Communities' ) && AC_Communities::all();
 $by_area   = assemble_communities_by_area();
 $mkt       = $by_area['marketing'][0] ?? '';
 $tech      = $by_area['technology'][0] ?? '';
@@ -84,18 +84,18 @@ if ( is_int( $user_id ) ) {
 }
 
 // Audiences: the seam and the test stub.
-if ( is_int( $user_id ) && class_exists( 'AFR_Audience' ) ) {
+if ( is_int( $user_id ) && class_exists( 'AC_Audience' ) ) {
 	wp_set_current_user( $user_id );
-	aat_check( [ 'Public' ] === AFR_Audience::current_audiences(), 'a free account is Public only' );
+	aat_check( [ 'Public' ] === AC_Audience::current_audiences(), 'a free account is Public only' );
 
 	update_user_meta( $user_id, ASSEMBLE_META_TEST_AUDIENCES, [ 'Board Member', 'Not An Audience' ] );
 	aat_check( [ 'Board Member' ] === assemble_user_audiences( $user_id ), 'unknown audience names are dropped' );
-	aat_check( in_array( 'Board Member', AFR_Audience::current_audiences(), true ), 'the stub reaches afr_current_audiences' );
+	aat_check( in_array( 'Board Member', AC_Audience::current_audiences(), true ), 'the stub reaches ac_current_audiences' );
 
 	$host                 = $_SERVER['HTTP_HOST'] ?? null;
 	$_SERVER['HTTP_HOST'] = 'theassemble.com';
 	aat_check( [] === assemble_user_audiences( $user_id ), 'the stub is ignored on theassemble.com' );
-	aat_check( [ 'Public' ] === AFR_Audience::current_audiences(), 'production: the free account is Public only' );
+	aat_check( [ 'Public' ] === AC_Audience::current_audiences(), 'production: the free account is Public only' );
 	if ( null === $host ) {
 		unset( $_SERVER['HTTP_HOST'] );
 	} else {
@@ -109,18 +109,18 @@ if ( is_int( $user_id ) && class_exists( 'AFR_Audience' ) ) {
 
 	// The gate itself, on a stored report (the bypass must be off locally).
 	$report = get_posts( [ 'post_type' => 'field_report', 'numberposts' => 1, 'post_status' => 'publish' ] );
-	if ( $report && 'off' === AFR_Bypass::mode() ) {
+	if ( $report && 'off' === AC_Bypass::mode() ) {
 		$id      = (int) $report[0]->ID;
-		$allowed = AFR_Audience::report_audiences( $id );
+		$allowed = AC_Audience::report_audiences( $id );
 		delete_user_meta( $user_id, ASSEMBLE_META_TEST_AUDIENCES );
-		aat_check( in_array( 'Public', $allowed, true ) ? 'public' === AFR_Audience::view_for( $id ) : 'denied' === AFR_Audience::view_for( $id ), 'free account: denied (or public on a Public report)' );
+		aat_check( in_array( 'Public', $allowed, true ) ? 'public' === AC_Audience::view_for( $id ) : 'denied' === AC_Audience::view_for( $id ), 'free account: denied (or public on a Public report)' );
 		if ( in_array( 'Board Member', $allowed, true ) ) {
 			update_user_meta( $user_id, ASSEMBLE_META_TEST_AUDIENCES, [ 'Board Member' ] );
-			aat_check( 'standard' === AFR_Audience::view_for( $id ), 'stubbed Board Member: standard view' );
+			aat_check( 'standard' === AC_Audience::view_for( $id ), 'stubbed Board Member: standard view' );
 		}
 		if ( in_array( 'Council Chair', $allowed, true ) ) {
 			update_user_meta( $user_id, ASSEMBLE_META_TEST_AUDIENCES, [ 'Council Chair' ] );
-			aat_check( 'council' === AFR_Audience::view_for( $id ), 'stubbed Council Chair: council view' );
+			aat_check( 'council' === AC_Audience::view_for( $id ), 'stubbed Council Chair: council view' );
 		}
 	} else {
 		WP_CLI::warning( 'No report, or the bypass is not off: gate checks skipped.' );

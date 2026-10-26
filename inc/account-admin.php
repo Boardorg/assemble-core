@@ -21,7 +21,7 @@ function assemble_admin_area_labels(): array {
 /** Print the Assemble section on a user screen. */
 function assemble_account_admin_fields( WP_User $user ): void {
 	$profile     = assemble_account_profile( $user->ID );
-	$communities = class_exists( 'AFR_Communities' ) ? AFR_Communities::all() : [];
+	$communities = class_exists( 'AC_Communities' ) ? AC_Communities::all() : [];
 	$by_area     = assemble_communities_by_area();
 	$tests       = (array) ( get_user_meta( $user->ID, ASSEMBLE_META_TEST_AUDIENCES, true ) ?: [] );
 
