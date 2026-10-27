@@ -92,11 +92,19 @@ function assemble_setup_primary_items(): array {
 			'url'   => '/field-reports/',
 		];
 
-	$items[] = [
-		'title' => 'Communities',
-		'type'  => 'custom',
-		'url'   => (string) assemble_site_setting( 'communities_url' ),
-	];
+	$communities = get_page_by_path( 'communities' );
+	$items[]     = $communities instanceof WP_Post
+		? [
+			'title'     => 'Communities',
+			'type'      => 'post_type',
+			'object'    => 'page',
+			'object_id' => (int) $communities->ID,
+		]
+		: [
+			'title' => 'Communities',
+			'type'  => 'custom',
+			'url'   => (string) assemble_site_setting( 'communities_url' ),
+		];
 
 	$summits = get_page_by_path( 'summits' );
 	$items[] = $summits instanceof WP_Post

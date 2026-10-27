@@ -878,6 +878,252 @@
             ]
         },
         {
+            "key": "field_assemble_cp_tab_index",
+            "label": "Index page",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "index"
+                    }
+                ]
+            ],
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_points_heading",
+            "label": "Value points heading",
+            "name": "points_heading",
+            "type": "text",
+            "instructions": "E.g. Why leaders join an Assemble Community.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_points",
+            "label": "Value points",
+            "name": "points",
+            "type": "repeater",
+            "instructions": "The punch: three short points (four at most), shown numbered under the proof band.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add point",
+            "min": 0,
+            "max": 4,
+            "collapsed": "field_assemble_cp_points_title",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_points_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Answers from people who’ve done it.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_points_body",
+                    "label": "Body",
+                    "name": "body",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 3,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_finder_heading",
+            "label": "Filter heading",
+            "name": "finder_heading",
+            "type": "text",
+            "instructions": "Heading over the practice and Community pills, e.g. Find your Community. Also the hero’s first button.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_finder_lead",
+            "label": "Filter lead",
+            "name": "finder_lead",
+            "type": "textarea",
+            "instructions": "One line under the heading.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_finder_empty",
+            "label": "Practice with no Communities yet",
+            "name": "finder_empty",
+            "type": "textarea",
+            "instructions": "Shown for a practice with no Communities (Finance and Legal today). {practice} reads as the practice’s name.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_index_included_heading",
+            "label": "Membership heading",
+            "name": "index_included_heading",
+            "type": "text",
+            "instructions": "Over the shared pillars, e.g. How membership works. Also the hero’s second link. Blank = the shared one.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_index_fit_heading",
+            "label": "Requirements heading",
+            "name": "index_fit_heading",
+            "type": "text",
+            "instructions": "Blank = the shared one, which names a Board.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_index_fit_lead",
+            "label": "Requirements lead",
+            "name": "index_fit_lead",
+            "type": "textarea",
+            "instructions": "Blank = the shared one.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_index_requirements",
+            "label": "Requirements",
+            "name": "index_requirements",
+            "type": "repeater",
+            "instructions": "The requirements as this page words them. Blank = the shared ones (Community defaults), with {field} read as “functional”.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add requirement",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_index_requirements_group",
+                    "label": "Requirement for",
+                    "name": "group",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "25",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "individual": "The individual",
+                        "company": "The company"
+                    },
+                    "default_value": "individual",
+                    "return_format": "value",
+                    "ui": 0,
+                    "allow_null": 0,
+                    "multiple": 0
+                },
+                {
+                    "key": "field_assemble_cp_index_requirements_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Senior decision-maker.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "75",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_index_requirements_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
             "key": "field_assemble_cp_tab_closing",
             "label": "Closing",
             "name": "",
@@ -917,6 +1163,28 @@
             "new_lines": ""
         },
         {
+            "key": "field_assemble_cp_closing_button",
+            "label": "Closing button",
+            "name": "closing_button",
+            "type": "text",
+            "instructions": "E.g. Talk to us. Links to the membership URL (Site Settings).",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "index"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
             "key": "field_assemble_cp_closing_image",
             "label": "Closing image",
             "name": "closing_image",
@@ -954,5 +1222,5 @@
     "active": true,
     "description": "Fields for pages on the Community page template (/communities/…). Read by assemble_community_page_view() in assemble-core/inc/communities.php.",
     "show_in_rest": 0,
-    "modified": 1793073602
+    "modified": 1793075708
 }

@@ -76,7 +76,43 @@ update_field( 'field_assemble_cp_community_area', 'marketing', $id );
 $view = assemble_community_page_view( get_post( $id ) );
 act_check( 'area' === ( $view['kind'] ?? '' ) && 'marketing' === $view['area'], 'a practice-area page reports its kind and area' );
 
+// The index: value points (blank rows dropped, four at most), the filter copy, the shared blocks.
+update_field( 'field_assemble_cp_community_type', 'index', $id );
+update_field( 'field_assemble_cp_points_heading', 'Why join', $id );
+update_field( 'field_assemble_cp_points', [ [ 'title' => 'One', 'body' => 'B' ], [ 'title' => '', 'body' => 'skipped' ], [ 'title' => 'Two', 'body' => '' ] ], $id );
+update_field( 'field_assemble_cp_finder_heading', 'Find your Community', $id );
+update_field( 'field_assemble_cp_closing_button', 'Talk to us', $id );
+$view = assemble_community_page_view( get_post( $id ) );
+act_check( 'index' === ( $view['kind'] ?? '' ) && 'neutral' === $view['area'], 'the index reports its kind' );
+act_check( [ 'One', 'Two' ] === array_column( $view['points']['items'] ?? [], 'title' ), 'index points drop blank rows' );
+act_check( 'Find your Community' === ( $view['finder']['heading'] ?? '' ), 'the index has its filter heading' );
+act_check( 'Talk to us' === ( $view['closing']['cta'] ?? '' ), 'the index closing button is its own' );
+act_check( isset( $view['included']['items'], $view['fit']['groups'], $view['board'], $view['field'] ), 'the index has the shared pillars, requirements and placeholders' );
+update_field( 'field_assemble_cp_index_requirements', [ [ 'group' => 'company', 'title' => 'Big', 'description' => '' ] ], $id );
+$view = assemble_community_page_view( get_post( $id ) );
+act_check( 1 === count( $view['fit']['groups'] ) && 'Big' === $view['fit']['groups'][0]['items'][0][0], 'index requirements replace the shared ones' );
+
 wp_delete_post( $id, true );
+
+// The audience clause from a boilerplate.
+act_check( 'senior search, SEO and content leaders at the world’s largest companies' === assemble_community_audience( 'The AEO Board is an Assemble community that helps senior search, SEO and content leaders at the world’s largest companies make better decisions.' ), 'audience from the boilerplate' );
+act_check( '' === assemble_community_audience( 'Something else entirely.' ), 'no audience without the pattern' );
+
+// The directory: every practice present, Boards before Councils, pages joined by Community.
+$directory = assemble_community_directory();
+act_check( assemble_practice_area_keys() === array_keys( $directory ), 'the directory lists every practice in order' );
+act_check( [] === $directory['finance'], 'Finance and Legal has no Communities yet' );
+foreach ( $directory as $communities ) {
+	$kinds = array_column( $communities, 'kind' );
+	act_check( $kinds === array_merge( array_diff( $kinds, [ 'council' ] ), array_intersect( $kinds, [ 'council' ] ) ) || [] === $kinds, 'Councils come after Boards' );
+}
+$aeo = get_page_by_path( 'communities/aeo' );
+if ( $aeo && 'publish' === $aeo->post_status && 'aeo' === get_field( 'community_slug', $aeo->ID ) ) {
+	$joined = array_values( array_filter( $directory['marketing'], static fn ( $c ) => 'aeo' === $c['slug'] ) )[0] ?? [];
+	act_check( get_permalink( $aeo ) === ( $joined['page']['url'] ?? '' ), 'a Community with a published page is joined to it' );
+}
+$pageless = array_filter( array_merge( ...array_values( $directory ) ), static fn ( $c ) => null === $c['page'] );
+act_check( ! class_exists( 'AC_Communities' ) || [] !== $pageless, 'Communities without a page have page = null' );
 
 $r = $GLOBALS['act'];
 if ( $r['fail'] ) {
