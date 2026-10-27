@@ -437,6 +437,11 @@ function assemble_community_audience( string $boilerplate ): string {
 	return preg_match( '/\b(senior\b.+?\b(?:companies|organizations|organisations|hospitals|brands|enterprises))\b/u', $text, $m ) ? $m[1] : '';
 }
 
+/** True for a Network ("HR Network"): a whole Practice, not a Board or Council. */
+function assemble_community_is_network( string $name ): bool {
+	return (bool) preg_match( '/\bNetwork$/', trim( $name ) );
+}
+
 /**
  * Every Community in the feed's directory, grouped by practice (in the shared
  * key order), Boards before Councils, each joined to its published Community
@@ -444,6 +449,7 @@ function assemble_community_audience( string $boilerplate ): string {
  *   slug, name, label (no " Board"), area, kind (board|council), boilerplate,
  *   audience, logo, page: null | { url, one_liner, member_count, session }.
  * Every practice key is present, empty when it has no Communities yet.
+ * Networks (e.g. "HR Network") are left out.
  *
  * @return array<string,array<int,array<string,mixed>>>
  */
@@ -491,11 +497,13 @@ function assemble_community_directory(): array {
 
 	foreach ( AC_Communities::all() as $slug => $community ) {
 		$area = (string) ( $community['practice_area'] ?? '' );
-		if ( ! isset( $directory[ $area ] ) ) {
+		$name = (string) $community['name'];
+		// A Network is a whole Practice, not a Board: it's sold elsewhere (handoff §2, "Other ways in").
+		if ( ! isset( $directory[ $area ] ) || assemble_community_is_network( $name ) ) {
 			continue;
 		}
 
-		$name                 = (string) $community['name'];
+
 		$directory[ $area ][] = [
 			'slug'        => (string) $slug,
 			'name'        => $name,
