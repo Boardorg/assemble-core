@@ -1,0 +1,958 @@
+{
+    "key": "group_assemble_community_page",
+    "title": "Community page",
+    "fields": [
+        {
+            "key": "field_assemble_cp_tab_page",
+            "label": "Page",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_community_type",
+            "label": "Page type",
+            "name": "community_type",
+            "type": "select",
+            "instructions": "Board or Council: a sales page for one Community. Practice area: the Boards in one practice. Communities index: /communities/ itself.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "board": "Board",
+                "council": "Council",
+                "area": "Practice area",
+                "index": "Communities index"
+            },
+            "default_value": "board",
+            "return_format": "value",
+            "ui": 0,
+            "allow_null": 0,
+            "multiple": 0
+        },
+        {
+            "key": "field_assemble_cp_community_slug",
+            "label": "Community",
+            "name": "community_slug",
+            "type": "select",
+            "instructions": "The Board or Council this page sells. Its name, logo, colour, Insights and Summit come from its Community entry in Contentful.",
+            "required": 1,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "board"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "council"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {},
+            "default_value": "",
+            "return_format": "value",
+            "ui": 1,
+            "allow_null": 0,
+            "multiple": 0,
+            "ajax": 0
+        },
+        {
+            "key": "field_assemble_cp_community_area",
+            "label": "Practice",
+            "name": "community_area",
+            "type": "select",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "area"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {},
+            "default_value": "",
+            "return_format": "value",
+            "ui": 0,
+            "allow_null": 0,
+            "multiple": 0
+        },
+        {
+            "key": "field_assemble_cp_community_field",
+            "label": "Field name",
+            "name": "community_field",
+            "type": "text",
+            "instructions": "The field as written in a sentence, e.g. AEO, L&D, supply chain. Fills {field}. Blank = the Community’s short name.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "board"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "council"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "70",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_community_article",
+            "label": "a or an",
+            "name": "community_article",
+            "type": "select",
+            "instructions": "As said aloud: an AEO leader, an L&D leader, a supply chain leader.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "board"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "council"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "30",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "a": "a",
+                "an": "an"
+            },
+            "default_value": "a",
+            "return_format": "value",
+            "ui": 0,
+            "allow_null": 0,
+            "multiple": 0
+        },
+        {
+            "key": "field_assemble_cp_community_one_liner",
+            "label": "One-liner",
+            "name": "community_one_liner",
+            "type": "textarea",
+            "instructions": "One sentence for this page’s card on the index and practice-area pages.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": "",
+            "maxlength": 200
+        },
+        {
+            "key": "field_assemble_cp_tab_hero",
+            "label": "Hero and members",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_hero_headline",
+            "label": "Hero headline",
+            "name": "hero_headline",
+            "type": "text",
+            "instructions": "The page’s H1.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_hero_dek",
+            "label": "Hero dek",
+            "name": "hero_dek",
+            "type": "textarea",
+            "instructions": "One or two sentences under the headline.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 3,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_hero_image",
+            "label": "Hero image",
+            "name": "hero_image",
+            "type": "image",
+            "instructions": "An illustration from the shared brand library.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all"
+        },
+        {
+            "key": "field_assemble_cp_member_count",
+            "label": "Member count",
+            "name": "member_count",
+            "type": "text",
+            "instructions": "As shown, e.g. 50+. Blank hides the count.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_member_descriptor",
+            "label": "Member descriptor",
+            "name": "member_descriptor",
+            "type": "text",
+            "instructions": "The line beside the count.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "75",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_member_functions",
+            "label": "Who the members are",
+            "name": "member_functions",
+            "type": "textarea",
+            "instructions": "Shown in the good-company section: who the members are and the functions they come from.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_member_logos",
+            "label": "Member companies",
+            "name": "member_logos",
+            "type": "repeater",
+            "instructions": "Up to 7, in display order.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "button_label": "Add company",
+            "min": 0,
+            "max": 7,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_member_logos_company",
+                    "label": "Company",
+                    "name": "company",
+                    "type": "text",
+                    "instructions": "Shown as a name tile until a logo is added.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_member_logos_logo",
+                    "label": "Logo",
+                    "name": "logo",
+                    "type": "image",
+                    "instructions": "Only a logo the company has approved for public use.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "preview_size": "thumbnail",
+                    "library": "all"
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_tab_pitch",
+            "label": "The pitch",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "board"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "council"
+                    }
+                ]
+            ],
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_problem_heading",
+            "label": "Problem heading",
+            "name": "problem_heading",
+            "type": "text",
+            "instructions": "The heading beside the two paragraphs: the problem this Board solves.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_problem_body",
+            "label": "Problem body",
+            "name": "problem_body",
+            "type": "textarea",
+            "instructions": "Two short paragraphs, with a blank line between. The first is set larger.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 6,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_challenges_heading",
+            "label": "Challenges heading",
+            "name": "challenges_heading",
+            "type": "text",
+            "instructions": "Blank = the shared heading (Community defaults).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_challenges",
+            "label": "Challenges",
+            "name": "challenges",
+            "type": "repeater",
+            "instructions": "Three to five questions members are working through now. Shown numbered.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "button_label": "Add question",
+            "min": 0,
+            "max": 6,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_challenges_question",
+                    "label": "Question",
+                    "name": "question",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    }
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_own_pillars",
+            "label": "This Board’s own pillars",
+            "name": "own_pillars",
+            "type": "repeater",
+            "instructions": "Added to the shared What’s included pillars (Community defaults), e.g. AEO’s vendor peer intelligence.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add pillar",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_own_pillars_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Live weekly Working Sessions.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_own_pillars_body",
+                    "label": "Body",
+                    "name": "body",
+                    "type": "textarea",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_assemble_cp_own_pillars_tags_intro",
+                    "label": "Tags intro",
+                    "name": "tags_intro",
+                    "type": "text",
+                    "instructions": "The line before the tags, e.g. Topics include, or Access. Use tags or formats, not both.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_own_pillars_tags",
+                    "label": "Tags",
+                    "name": "tags",
+                    "type": "textarea",
+                    "instructions": "One per line, e.g. Tech stack.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "60",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 3,
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_assemble_cp_own_pillars_details",
+                    "label": "Formats",
+                    "name": "details",
+                    "type": "repeater",
+                    "instructions": "Named formats shown as a two-column list.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "table",
+                    "button_label": "Add format",
+                    "min": 0,
+                    "max": 0,
+                    "collapsed": "",
+                    "sub_fields": [
+                        {
+                            "key": "field_assemble_cp_own_pillars_details_name",
+                            "label": "Name",
+                            "name": "name",
+                            "type": "text",
+                            "instructions": "E.g. Show and Share.",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "30",
+                                "class": "",
+                                "id": ""
+                            }
+                        },
+                        {
+                            "key": "field_assemble_cp_own_pillars_details_description",
+                            "label": "Description",
+                            "name": "description",
+                            "type": "textarea",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "70",
+                                "class": "",
+                                "id": ""
+                            },
+                            "rows": 2,
+                            "new_lines": ""
+                        }
+                    ]
+                },
+                {
+                    "key": "field_assemble_cp_own_pillars_after",
+                    "label": "Place after shared pillar #",
+                    "name": "after",
+                    "type": "number",
+                    "instructions": "1 = after the first shared pillar. Blank = before the last shared one.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "min": 1,
+                    "max": 9,
+                    "step": 1
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_own_impact",
+            "label": "Replace the shared impact cards",
+            "name": "own_impact",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "ui": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_assemble_cp_own_requirements",
+            "label": "Replace the shared requirements",
+            "name": "own_requirements",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "ui": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_assemble_cp_impact",
+            "label": "Impact cards",
+            "name": "impact",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_own_impact",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add card",
+            "min": 0,
+            "max": 3,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_impact_level",
+                    "label": "Level",
+                    "name": "level",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Company": "Company",
+                        "Team": "Team",
+                        "You": "You"
+                    },
+                    "default_value": "Company",
+                    "return_format": "value",
+                    "ui": 0,
+                    "allow_null": 0,
+                    "multiple": 0
+                },
+                {
+                    "key": "field_assemble_cp_impact_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "80",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_impact_body",
+                    "label": "Body",
+                    "name": "body",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_requirements",
+            "label": "Requirements",
+            "name": "requirements",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_own_requirements",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add requirement",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_requirements_group",
+                    "label": "Requirement for",
+                    "name": "group",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "25",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "individual": "The individual",
+                        "company": "The company"
+                    },
+                    "default_value": "individual",
+                    "return_format": "value",
+                    "ui": 0,
+                    "allow_null": 0,
+                    "multiple": 0
+                },
+                {
+                    "key": "field_assemble_cp_requirements_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Senior decision-maker.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "75",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_requirements_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_tab_sessions",
+            "label": "Working Sessions",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "board"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "council"
+                    }
+                ]
+            ],
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_sessions",
+            "label": "Upcoming Working Sessions",
+            "name": "sessions",
+            "type": "repeater",
+            "instructions": "Past sessions drop off the page on their own; the section hides when none are upcoming.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add session",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cp_sessions_date",
+                    "label": "Date and time",
+                    "name": "date",
+                    "type": "date_time_picker",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "M j, Y g:i a",
+                    "return_format": "Y-m-d H:i:s",
+                    "first_day": 0
+                },
+                {
+                    "key": "field_assemble_cp_sessions_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "Public: name no member company or person.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "70",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cp_sessions_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cp_tab_closing",
+            "label": "Closing",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cp_closing_heading",
+            "label": "Closing heading",
+            "name": "closing_heading",
+            "type": "text",
+            "instructions": "Blank = the shared one (Community defaults).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_closing_body",
+            "label": "Closing body",
+            "name": "closing_body",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 3,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cp_closing_image",
+            "label": "Closing image",
+            "name": "closing_image",
+            "type": "image",
+            "instructions": "An illustration from the shared brand library.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "preview_size": "medium",
+            "library": "all"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "page-community.php"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content"
+    ],
+    "active": true,
+    "description": "Fields for pages on the Community page template (/communities/…). Read by assemble_community_page_view() in assemble-core/inc/communities.php.",
+    "show_in_rest": 0,
+    "modified": 1793073602
+}

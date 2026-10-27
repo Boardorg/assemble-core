@@ -1,0 +1,474 @@
+{
+    "key": "group_assemble_community_defaults",
+    "title": "Community defaults",
+    "fields": [
+        {
+            "key": "field_assemble_cd_tab_impact",
+            "label": "Impact",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cd_cd_impact_heading",
+            "label": "Heading",
+            "name": "cd_impact_heading",
+            "type": "text",
+            "instructions": "The heading over the three cards.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cd_cd_impact",
+            "label": "Impact cards",
+            "name": "cd_impact",
+            "type": "repeater",
+            "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add card",
+            "min": 0,
+            "max": 3,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cd_cd_impact_level",
+                    "label": "Level",
+                    "name": "level",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Company": "Company",
+                        "Team": "Team",
+                        "You": "You"
+                    },
+                    "default_value": "Company",
+                    "return_format": "value",
+                    "ui": 0,
+                    "allow_null": 0,
+                    "multiple": 0
+                },
+                {
+                    "key": "field_assemble_cd_cd_impact_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "80",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cd_cd_impact_body",
+                    "label": "Body",
+                    "name": "body",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cd_tab_included",
+            "label": "What’s included",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cd_cd_included_heading",
+            "label": "Heading",
+            "name": "cd_included_heading",
+            "type": "text",
+            "instructions": "The heading over the numbered pillars.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cd_cd_included",
+            "label": "Shared pillars",
+            "name": "cd_included",
+            "type": "repeater",
+            "instructions": "Every Board page shows these, in this order, plus its own.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add pillar",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cd_cd_included_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Live weekly Working Sessions.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cd_cd_included_body",
+                    "label": "Body",
+                    "name": "body",
+                    "type": "textarea",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_assemble_cd_cd_included_tags_intro",
+                    "label": "Tags intro",
+                    "name": "tags_intro",
+                    "type": "text",
+                    "instructions": "The line before the tags, e.g. Topics include, or Access. Use tags or formats, not both.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cd_cd_included_tags",
+                    "label": "Tags",
+                    "name": "tags",
+                    "type": "textarea",
+                    "instructions": "One per line, e.g. Tech stack.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "60",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 3,
+                    "new_lines": ""
+                },
+                {
+                    "key": "field_assemble_cd_cd_included_details",
+                    "label": "Formats",
+                    "name": "details",
+                    "type": "repeater",
+                    "instructions": "Named formats shown as a two-column list.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "table",
+                    "button_label": "Add format",
+                    "min": 0,
+                    "max": 0,
+                    "collapsed": "",
+                    "sub_fields": [
+                        {
+                            "key": "field_assemble_cd_cd_included_details_name",
+                            "label": "Name",
+                            "name": "name",
+                            "type": "text",
+                            "instructions": "E.g. Show and Share.",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "30",
+                                "class": "",
+                                "id": ""
+                            }
+                        },
+                        {
+                            "key": "field_assemble_cd_cd_included_details_description",
+                            "label": "Description",
+                            "name": "description",
+                            "type": "textarea",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "70",
+                                "class": "",
+                                "id": ""
+                            },
+                            "rows": 2,
+                            "new_lines": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cd_tab_fit",
+            "label": "Is this you?",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cd_cd_fit_heading",
+            "label": "Heading",
+            "name": "cd_fit_heading",
+            "type": "textarea",
+            "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cd_cd_fit_lead",
+            "label": "Lead line",
+            "name": "cd_fit_lead",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cd_cd_requirements",
+            "label": "Requirements",
+            "name": "cd_requirements",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "button_label": "Add requirement",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "sub_fields": [
+                {
+                    "key": "field_assemble_cd_cd_requirements_group",
+                    "label": "Requirement for",
+                    "name": "group",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "25",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "individual": "The individual",
+                        "company": "The company"
+                    },
+                    "default_value": "individual",
+                    "return_format": "value",
+                    "ui": 0,
+                    "allow_null": 0,
+                    "multiple": 0
+                },
+                {
+                    "key": "field_assemble_cd_cd_requirements_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "instructions": "E.g. Senior decision-maker.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "75",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_assemble_cd_cd_requirements_description",
+                    "label": "Description",
+                    "name": "description",
+                    "type": "textarea",
+                    "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "rows": 2,
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_assemble_cd_tab_other",
+            "label": "Headings and closing",
+            "name": "",
+            "type": "tab",
+            "conditional_logic": 0,
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_assemble_cd_cd_challenges_heading",
+            "label": "Challenges heading",
+            "name": "cd_challenges_heading",
+            "type": "text",
+            "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO). Blank = The challenges our {field} members are working through now.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cd_cd_company_heading",
+            "label": "Good company heading",
+            "name": "cd_company_heading",
+            "type": "text",
+            "instructions": "The heading over the member functions line.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cd_cd_closing_heading",
+            "label": "Closing heading",
+            "name": "cd_closing_heading",
+            "type": "text",
+            "instructions": "Used when a page has none of its own.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cd_cd_closing_body",
+            "label": "Closing body",
+            "name": "cd_closing_body",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_assemble_cd_cd_apply_label",
+            "label": "Apply button",
+            "name": "cd_apply_label",
+            "type": "text",
+            "instructions": "May use {board} (AEO Board), {field} (AEO) and {a_field} (an AEO). Blank = Apply to join the {board}.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            }
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "assemble-community-defaults"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "seamless",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Copy every Community page shares. Read by assemble_community_default(); empty fields use the defaults in assemble-core/inc/communities.php.",
+    "show_in_rest": 0,
+    "modified": 1793073602
+}

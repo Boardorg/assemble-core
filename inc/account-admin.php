@@ -10,11 +10,11 @@ defined( 'ABSPATH' ) || exit;
 /** Practice-area labels for wp-admin (the theme owns the public ones). */
 function assemble_admin_area_labels(): array {
 	return [
-		'human-resources' => 'Human Capital',
-		'manufacturing'   => 'Supply Chain',
-		'marketing'       => 'Marketing & Comms',
-		'technology'      => 'Technology',
-		'finance'         => 'Finance',
+		'human-resources' => 'Human Resources',
+		'manufacturing'   => 'Supply Chain & Manufacturing',
+		'marketing'       => 'Marketing and Communications',
+		'technology'      => 'Data and Technology',
+		'finance'         => 'Finance and Legal',
 	];
 }
 
