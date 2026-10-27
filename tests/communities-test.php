@@ -102,6 +102,8 @@ act_check( '' === assemble_community_audience( 'Something else entirely.' ), 'no
 $directory = assemble_community_directory();
 act_check( assemble_practice_area_keys() === array_keys( $directory ), 'the directory lists every practice in order' );
 act_check( [] === $directory['finance'], 'Finance and Legal has no Communities yet' );
+act_check( assemble_community_is_network( 'HR Network' ) && ! assemble_community_is_network( 'AEO Board' ), 'Networks are recognised by name' );
+act_check( [] === array_filter( array_merge( ...array_values( $directory ) ), static fn ( $c ) => assemble_community_is_network( $c['name'] ) ), 'the directory leaves Networks out' );
 foreach ( $directory as $communities ) {
 	$kinds = array_column( $communities, 'kind' );
 	act_check( $kinds === array_merge( array_diff( $kinds, [ 'council' ] ), array_intersect( $kinds, [ 'council' ] ) ) || [] === $kinds, 'Councils come after Boards' );
