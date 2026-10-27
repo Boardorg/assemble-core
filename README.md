@@ -16,16 +16,18 @@ Creates what's missing on any install (local, the beta, a clean copy at launch) 
 
 - the standard pages at today's theassemble.com URLs: `/about-us/`, `/our-team/`, `/careers/`, `/contact-us/`, `/contact-us/thank-you/`, `/policies/` (filter `assemble/setup_pages`);
 - the account pages at the paths of the Site Settings account URLs (`/login/`, `/register/`, `/account/`; filter `assemble/setup_account_pages`), created empty because their templates render the forms. `--adopt-um` empties an account page that still holds an Ultimate Member shortcode and retitles it, once (the old content stays as a revision);
-- the "Masthead" menu (Insights → the Field Reports archive, Communities → the `communities_url` Site Setting, Summits → the Summits page; filter `assemble/setup_primary_items`), assigned to the theme's `primary` location unless a menu already holds it. The footer stays on Site Settings → Footer columns.
+- the "Masthead" menu (Insights → the Field Reports archive, Communities → the Communities page, else the `communities_url` Site Setting, Summits → the Summits page; filter `assemble/setup_primary_items`), assigned to the theme's `primary` location unless a menu already holds it. The footer stays on Site Settings → Footer columns.
 
 Page copy is content, not code, so it isn't in this public repo. A new page gets a one-line placeholder, or `<dir>/<slug>.html` (block markup; a child page's file is `<parent>--<slug>.html`) with `--content-dir`. `--adopt-elementor` also replaces the content of a standard page that is still an Elementor page with its file, resets its template and sentence-cases its title; WordPress keeps the old content as a revision, and the page is marked so it's adopted once. Content files are trusted (they may embed a form script), so setup writes them without kses.
 
-## Community pages (0.9.0)
+## Community pages (0.9.0, index 0.10.0)
 
 Sales pages under `/communities/` are ordinary pages on the theme's **Community page** template, with their copy in Secure Custom Fields (`inc/communities.php`, field groups in `acf-json/`):
 
 - **Community page** (on pages using the template): the page type (Board, Council, Practice area, Communities index), the Community it sells (a dropdown of the Assemble Content feed's Community directory, which supplies the name, logo and practice colour), and the Board's own copy: hero, member count and companies, problem, challenges, its own pillars, upcoming Working Sessions, closing.
 - **Community defaults** (Site Settings → Community defaults): the copy every Board page shares (impact cards, What's included pillars, requirements, headings), with `{board}`, `{field}` and `{a_field}` filled in per page. Code holds only structural defaults (section labels, the Apply button); the shared copy is content and lives in the options page.
+
+**The Communities index (0.10.0)** is the `communities` page with Page type **Communities index**. Its own copy sits on the **Index page** tab (value points, the filter's heading, lead and empty-practice line, the membership and requirements headings, its own requirements) plus the hero, members and closing tabs (closing button label too). It reuses the Community defaults' pillars, with `{board}` read as "Assemble Community" and `{field}` as "functional". `assemble_community_directory()` lists every Community by practice (Boards before Councils), each joined to its published Board or Council page, if any (url, one-liner, member count, next Working Session); the theme's "Find your Community" filter reads it.
 
 `assemble_community_page_view( $post )` builds the view model and answers the theme's `assemble/community_page` filter. Tests: `wp eval-file wp-content/plugins/assemble-core/tests/communities-test.php` (local only).
 

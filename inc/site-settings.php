@@ -70,9 +70,9 @@ function assemble_site_setting_defaults(): array {
 			],
 		],
 
-		// Homepage links. Placeholders until those pages exist (Phase 6 / Communities index).
+		// Homepage and masthead links.
 		'how_it_works_url'   => '/about-us/',
-		'communities_url'    => '/field-reports/',
+		'communities_url'    => '/communities/',
 
 		// External apps (BUILD-INSTRUCTIONS §9.3).
 		'benchmark_url'      => 'https://report.theassemble.com/',
