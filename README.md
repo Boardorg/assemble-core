@@ -20,6 +20,15 @@ Creates what's missing on any install (local, the beta, a clean copy at launch) 
 
 Page copy is content, not code, so it isn't in this public repo. A new page gets a one-line placeholder, or `<dir>/<slug>.html` (block markup; a child page's file is `<parent>--<slug>.html`) with `--content-dir`. `--adopt-elementor` also replaces the content of a standard page that is still an Elementor page with its file, resets its template and sentence-cases its title; WordPress keeps the old content as a revision, and the page is marked so it's adopted once. Content files are trusted (they may embed a form script), so setup writes them without kses.
 
+## Community pages (0.9.0)
+
+Sales pages under `/communities/` are ordinary pages on the theme's **Community page** template, with their copy in Secure Custom Fields (`inc/communities.php`, field groups in `acf-json/`):
+
+- **Community page** (on pages using the template): the page type (Board, Council, Practice area, Communities index), the Community it sells (a dropdown of the Assemble Content feed's Community directory, which supplies the name, logo and practice colour), and the Board's own copy: hero, member count and companies, problem, challenges, its own pillars, upcoming Working Sessions, closing.
+- **Community defaults** (Site Settings → Community defaults): the copy every Board page shares (impact cards, What's included pillars, requirements, headings), with `{board}`, `{field}` and `{a_field}` filled in per page. Code holds only structural defaults (section labels, the Apply button); the shared copy is content and lives in the options page.
+
+`assemble_community_page_view( $post )` builds the view model and answers the theme's `assemble/community_page` filter. Tests: `wp eval-file wp-content/plugins/assemble-core/tests/communities-test.php` (local only).
+
 ## Redirects from the old site
 
 `inc/redirects.php` holds the 301s for old theassemble.com URLs that aren't rebuilt (plan: the project hub's BUILD-INSTRUCTIONS §9.5). Paths match without a trailing slash and case-insensitively, the query string is passed on, and they fire before WordPress picks a template, so an old page that still exists on the beta redirects too. Add or change one with the `assemble/redirects` filter or in the map. The old Ultimate Member URLs go to the new account flow (`/password-reset/` → Sign in's reset state; `/account-confirmation/`, `/user/`, `/members/`, `/networking-profile/` → Account) and `/my-report/` to the `benchmark_url` setting (Phase 7). `/login/`, `/register/` and `/account/` were rebuilt at the same URLs, and `/logout/` is a handler, so none of them is in the map; nor are the other benchmark pages (decision #10).
