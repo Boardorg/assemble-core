@@ -23,12 +23,13 @@ function ast_check( bool $ok, string $label ): void {
 }
 
 // Redirect matching.
-ast_check( '/' === assemble_redirect_target( '/our-product/' ), 'trailing slash matches' );
-ast_check( '/' === assemble_redirect_target( '/our-product' ), 'no trailing slash matches' );
-ast_check( '/' === assemble_redirect_target( '/Our-Product/' ), 'case-insensitive' );
-ast_check( '' === assemble_redirect_target( '/our-product/extra/' ), 'deeper paths are left alone' );
+ast_check( '/' === assemble_redirect_target( '/members-2/' ), 'trailing slash matches' );
+ast_check( '/' === assemble_redirect_target( '/members-2' ), 'no trailing slash matches' );
+ast_check( '/' === assemble_redirect_target( '/Members-2/' ), 'case-insensitive' );
+ast_check( '' === assemble_redirect_target( '/members-2/extra/' ), 'deeper paths are left alone' );
 ast_check( '' === assemble_redirect_target( '/' ), 'home is left alone' );
 ast_check( '' === assemble_redirect_target( '/about-us/' ), 'rebuilt pages are left alone' );
+ast_check( '' === assemble_redirect_target( '/our-product/' ), 'Our Product is rebuilt, not redirected (2026-11-06)' );
 ast_check( '' === assemble_redirect_target( '/benchmark/' ), 'benchmark pages are left alone (decision #10)' );
 ast_check( '' === assemble_redirect_target( '/login/' ), 'the rebuilt Sign in page is not redirected (Phase 7)' );
 ast_check( str_contains( assemble_redirect_target( '/password-reset/' ), 'action=lostpassword' ), 'the old password reset goes to the Sign in page\'s reset state' );
@@ -52,6 +53,7 @@ foreach ( array_keys( assemble_setup_pages() + assemble_setup_account_pages() ) 
 	ast_check( get_page_by_path( $path ) instanceof WP_Post, "page /{$path}/ exists" );
 }
 ast_check( 3 === count( assemble_setup_account_pages() ), 'three account pages (login, register, account)' );
+ast_check( [ 'About', 'Our product', 'Our team', 'Careers', 'Contact' ] === wp_list_pluck( assemble_setup_utility_items(), 'title' ), 'utility menu: the company pages in production\'s order' );
 ast_check( ! empty( get_nav_menu_locations()['primary'] ), 'the primary location holds a menu' );
 
 $dry = assemble_setup_run( true );
