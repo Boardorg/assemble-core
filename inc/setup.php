@@ -91,7 +91,7 @@ function assemble_setup_primary_items(): array {
 		: [
 			'title' => 'Insights',
 			'type'  => 'custom',
-			'url'   => '/field-reports/',
+			'url'   => '/insights/',
 		];
 
 	$communities = get_page_by_path( 'communities' );

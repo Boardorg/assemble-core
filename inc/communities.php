@@ -93,7 +93,7 @@ function assemble_community_image( $id, string $size = 'large' ): ?array {
 
 /**
  * A Board's logo: the Community entry's in Contentful, else the shared image
- * library's file (wp-content/assets/boards/<slug>-logo-color.png), else null.
+ * library's file (wp-content/assets/boards/<code or slug>-logo-color.png), else null.
  *
  * @return array{url:string,alt:string}|null
  */
@@ -107,9 +107,13 @@ function assemble_community_logo( array $community ): ?array {
 		}
 	}
 
-	$file = 'assets/boards/' . sanitize_file_name( (string) ( $community['slug'] ?? '' ) ) . '-logo-color.png';
-	if ( '' !== (string) ( $community['slug'] ?? '' ) && is_readable( WP_CONTENT_DIR . '/' . $file ) ) {
-		return [ 'url' => content_url( $file ), 'alt' => $name ];
+	// The library names most files by the Board's code ("dpb"), a few by slug.
+	$keys = array_filter( [ (string) ( $community['slug'] ?? '' ), strtolower( (string) ( $community['short_name'] ?? '' ) ) ] );
+	foreach ( array_unique( $keys ) as $key ) {
+		$file = 'assets/boards/' . sanitize_file_name( $key ) . '-logo-color.png';
+		if ( is_readable( WP_CONTENT_DIR . '/' . $file ) ) {
+			return [ 'url' => content_url( $file ), 'alt' => $name ];
+		}
 	}
 
 	return null;

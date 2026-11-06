@@ -36,7 +36,7 @@ function assemble_site_setting_defaults(): array {
 		'free_reads'         => 2,
 
 		// Logged-out footer row above the columns (guide Draft 0.4).
-		'footer_cta_text'    => 'Get the latest Insights from peers who share your role.',
+		'footer_cta_text'    => 'Get the latest insights from peers who share your role.',
 
 		// Footer: four columns of [ label, url ]. An empty url renders plain text.
 		'footer_columns'     => [
@@ -52,9 +52,10 @@ function assemble_site_setting_defaults(): array {
 			[
 				'heading' => 'Resources',
 				'links'   => [
-					[ 'Insights', '/field-reports/' ],
+					[ 'Insights', '/insights/' ],
+					[ 'Communities', '/communities/' ],
 					[ 'Summits', '/summits/' ],
-					[ 'Benchmark', 'https://report.theassemble.com/' ],
+					[ 'Benchmark', '/benchmark/' ],
 				],
 			],
 			[
@@ -75,7 +76,10 @@ function assemble_site_setting_defaults(): array {
 		'how_it_works_url'   => '/about-us/',
 		'communities_url'    => '/communities/',
 
-		// External apps (BUILD-INSTRUCTIONS §9.3).
+		// The Benchmarks page: open surveys, past reports, personal results.
+		'benchmark_page_url' => '/benchmark/',
+
+		// External apps (BUILD-INSTRUCTIONS §9.3). Personal benchmark results.
 		'benchmark_url'      => 'https://report.theassemble.com/',
 
 		// Default share image (attachment ID); 0 means none.
