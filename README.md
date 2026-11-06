@@ -6,7 +6,7 @@ Content authored in Contentful belongs to [assemble-content](https://github.com/
 
 Pushes to `main` deploy to the WP Engine beta (`assemblebeta`). Production deploys are manual and need a reviewer's approval. No secrets in this repo, ever: it is public.
 
-## Standard pages and the masthead menu: `wp assemble setup`
+## Standard pages and the header menus: `wp assemble setup`
 
 ```
 wp assemble setup [--dry-run] [--content-dir=<dir>] [--adopt-elementor] [--adopt-um]
@@ -16,7 +16,8 @@ Creates what's missing on any install (local, the beta, a clean copy at launch) 
 
 - the standard pages at today's theassemble.com URLs: `/about-us/`, `/our-team/`, `/careers/`, `/contact-us/`, `/contact-us/thank-you/`, `/policies/` (filter `assemble/setup_pages`);
 - the account pages at the paths of the Site Settings account URLs (`/login/`, `/register/`, `/account/`; filter `assemble/setup_account_pages`), created empty because their templates render the forms. `--adopt-um` empties an account page that still holds an Ultimate Member shortcode and retitles it, once (the old content stays as a revision);
-- the "Masthead" menu (Insights → the Field Reports archive, Communities → the Communities page, else the `communities_url` Site Setting, Summits → the Summits page; filter `assemble/setup_primary_items`), assigned to the theme's `primary` location unless a menu already holds it. The footer stays on Site Settings → Footer columns.
+- the "Masthead" menu (Insights → the Field Reports archive, Communities → the Communities page, else the `communities_url` Site Setting, Summits → the Summits page; filter `assemble/setup_primary_items`), assigned to the theme's `primary` location unless a menu already holds it;
+- the "Utility" menu (About, Our team, Careers, Contact → their pages, else their URLs; filter `assemble/setup_utility_items`), assigned to the theme's `utility` location (the bar above the masthead, 0.11.0) on the same terms. The footer stays on Site Settings → Footer columns.
 
 Page copy is content, not code, so it isn't in this public repo. A new page gets a one-line placeholder, or `<dir>/<slug>.html` (block markup; a child page's file is `<parent>--<slug>.html`) with `--content-dir`. `--adopt-elementor` also replaces the content of a standard page that is still an Elementor page with its file, resets its template and sentence-cases its title; WordPress keeps the old content as a revision, and the page is marked so it's adopted once. Content files are trusted (they may embed a form script), so setup writes them without kses.
 

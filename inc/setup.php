@@ -1,6 +1,6 @@
 <?php
 /**
- * `wp assemble setup`: the standard pages and the masthead menu, on any install
+ * `wp assemble setup`: the standard pages and the header menus, on any install
  * (local, the beta, a clean copy at launch). Idempotent: it creates what's
  * missing and never overwrites what exists, so a second run changes nothing.
  *
@@ -21,8 +21,9 @@
  * that still holds an Ultimate Member shortcode and retitles it, once (the old
  * content stays as a revision).
  *
- * The footer stays on Site Settings → Footer columns, so only the "primary"
- * menu is created.
+ * Two menus: "Masthead" (the featured row, location "primary") and "Utility"
+ * (the company pages in the bar above the masthead, location "utility"). The
+ * footer stays on Site Settings → Footer columns, so it has no menu.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -125,6 +126,96 @@ function assemble_setup_primary_items(): array {
 
 /** The menu `wp assemble setup` creates for the masthead. */
 const ASSEMBLE_SETUP_PRIMARY_MENU = 'Masthead';
+
+/**
+ * Utility bar items: the company pages, linked as pages where they exist.
+ *
+ * @return array<int,array{title:string,type:string,object?:string,object_id?:int,url?:string}>
+ */
+function assemble_setup_utility_items(): array {
+	$items = [];
+	foreach ( [ 'about-us' => 'About', 'our-team' => 'Our team', 'careers' => 'Careers', 'contact-us' => 'Contact' ] as $path => $title ) {
+		$page    = get_page_by_path( $path );
+		$items[] = $page instanceof WP_Post
+			? [
+				'title'     => $title,
+				'type'      => 'post_type',
+				'object'    => 'page',
+				'object_id' => (int) $page->ID,
+			]
+			: [
+				'title' => $title,
+				'type'  => 'custom',
+				'url'   => "/{$path}/",
+			];
+	}
+
+	return (array) apply_filters( 'assemble/setup_utility_items', $items );
+}
+
+/** The menu `wp assemble setup` creates for the utility bar. */
+const ASSEMBLE_SETUP_UTILITY_MENU = 'Utility';
+
+/**
+ * Create a menu if it's missing, then assign it to a theme location unless
+ * something already holds it.
+ *
+ * @param string           $name     Menu name.
+ * @param string           $location Theme location.
+ * @param array<int,array> $items    From assemble_setup_*_items().
+ * @param bool             $dry_run  Report only.
+ * @param callable         $add      The run's log writer.
+ */
+function assemble_setup_menu( string $name, string $location, array $items, bool $dry_run, callable $add ): void {
+	$titles = implode( ', ', wp_list_pluck( $items, 'title' ) );
+	$menu   = wp_get_nav_menu_object( $name );
+	if ( $menu ) {
+		$add( 'menu ' . $name, 'exists', "#{$menu->term_id}, {$menu->count} items (left as is)" );
+		$menu_id = (int) $menu->term_id;
+	} elseif ( $dry_run ) {
+		$add( 'menu ' . $name, 'would create', $titles );
+		$menu_id = 0;
+	} else {
+		$menu_id = wp_create_nav_menu( $name );
+		if ( is_wp_error( $menu_id ) ) {
+			$add( 'menu ' . $name, 'failed', $menu_id->get_error_message() );
+			$menu_id = 0;
+		} else {
+			foreach ( $items as $position => $item ) {
+				$data = [
+					'menu-item-title'    => $item['title'],
+					'menu-item-type'     => $item['type'],
+					'menu-item-status'   => 'publish',
+					'menu-item-position' => $position + 1,
+				];
+				if ( 'custom' === $item['type'] ) {
+					$data['menu-item-url'] = $item['url'];
+				} else {
+					$data['menu-item-object'] = $item['object'];
+				}
+				if ( ! empty( $item['object_id'] ) ) {
+					$data['menu-item-object-id'] = $item['object_id'];
+				}
+				wp_update_nav_menu_item( $menu_id, 0, $data );
+			}
+			$add( 'menu ' . $name, 'created', "#{$menu_id}: {$titles}" );
+		}
+	}
+
+	$locations = (array) get_nav_menu_locations();
+	if ( ! array_key_exists( $location, get_registered_nav_menus() ) ) {
+		$add( "location {$location}", 'skipped', "the active theme registers no \"{$location}\" location" );
+	} elseif ( ! empty( $locations[ $location ] ) ) {
+		$held = wp_get_nav_menu_object( (int) $locations[ $location ] );
+		$add( "location {$location}", 'exists', $held ? "holds \"{$held->name}\" (left as is)" : 'holds a missing menu (left as is)' );
+	} elseif ( $dry_run || ! $menu_id ) {
+		$add( "location {$location}", $dry_run ? 'would assign' : 'skipped', $name );
+	} else {
+		$locations[ $location ] = $menu_id;
+		set_theme_mod( 'nav_menu_locations', $locations );
+		$add( "location {$location}", 'assigned', $name );
+	}
+}
 
 /**
  * Run the setup. Returns one row per thing checked.
@@ -239,55 +330,9 @@ function assemble_setup_run( bool $dry_run = false, string $content_dir = '', bo
 
 	kses_init();
 
-	// The masthead menu.
-	$menu = wp_get_nav_menu_object( ASSEMBLE_SETUP_PRIMARY_MENU );
-	if ( $menu ) {
-		$add( 'menu ' . ASSEMBLE_SETUP_PRIMARY_MENU, 'exists', "#{$menu->term_id}, {$menu->count} items (left as is)" );
-		$menu_id = (int) $menu->term_id;
-	} elseif ( $dry_run ) {
-		$add( 'menu ' . ASSEMBLE_SETUP_PRIMARY_MENU, 'would create', implode( ', ', wp_list_pluck( assemble_setup_primary_items(), 'title' ) ) );
-		$menu_id = 0;
-	} else {
-		$menu_id = wp_create_nav_menu( ASSEMBLE_SETUP_PRIMARY_MENU );
-		if ( is_wp_error( $menu_id ) ) {
-			$add( 'menu ' . ASSEMBLE_SETUP_PRIMARY_MENU, 'failed', $menu_id->get_error_message() );
-			$menu_id = 0;
-		} else {
-			foreach ( assemble_setup_primary_items() as $position => $item ) {
-				$data = [
-					'menu-item-title'    => $item['title'],
-					'menu-item-type'     => $item['type'],
-					'menu-item-status'   => 'publish',
-					'menu-item-position' => $position + 1,
-				];
-				if ( 'custom' === $item['type'] ) {
-					$data['menu-item-url'] = $item['url'];
-				} else {
-					$data['menu-item-object'] = $item['object'];
-				}
-				if ( ! empty( $item['object_id'] ) ) {
-					$data['menu-item-object-id'] = $item['object_id'];
-				}
-				wp_update_nav_menu_item( $menu_id, 0, $data );
-			}
-			$add( 'menu ' . ASSEMBLE_SETUP_PRIMARY_MENU, 'created', "#{$menu_id}: " . implode( ', ', wp_list_pluck( assemble_setup_primary_items(), 'title' ) ) );
-		}
-	}
-
-	// Assign it to the theme's "primary" location, unless something already holds it.
-	$locations = (array) get_nav_menu_locations();
-	if ( ! array_key_exists( 'primary', get_registered_nav_menus() ) ) {
-		$add( 'location primary', 'skipped', 'the active theme registers no "primary" location' );
-	} elseif ( ! empty( $locations['primary'] ) ) {
-		$held = wp_get_nav_menu_object( (int) $locations['primary'] );
-		$add( 'location primary', 'exists', $held ? "holds \"{$held->name}\" (left as is)" : 'holds a missing menu (left as is)' );
-	} elseif ( $dry_run || ! $menu_id ) {
-		$add( 'location primary', $dry_run ? 'would assign' : 'skipped', ASSEMBLE_SETUP_PRIMARY_MENU );
-	} else {
-		$locations['primary'] = $menu_id;
-		set_theme_mod( 'nav_menu_locations', $locations );
-		$add( 'location primary', 'assigned', ASSEMBLE_SETUP_PRIMARY_MENU );
-	}
+	// The header menus: the featured row, then the utility bar.
+	assemble_setup_menu( ASSEMBLE_SETUP_PRIMARY_MENU, 'primary', assemble_setup_primary_items(), $dry_run, $add );
+	assemble_setup_menu( ASSEMBLE_SETUP_UTILITY_MENU, 'utility', assemble_setup_utility_items(), $dry_run, $add );
 
 	return $log;
 }
@@ -298,7 +343,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	 */
 	class Assemble_Setup_CLI {
 		/**
-		 * Create the standard pages and the masthead menu where they're missing.
+		 * Create the standard pages and the header menus where they're missing.
 		 *
 		 * ## OPTIONS
 		 *
