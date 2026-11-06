@@ -44,6 +44,7 @@ function assemble_site_setting_defaults(): array {
 				'heading' => 'Company',
 				'links'   => [
 					[ 'About', '/about-us/' ],
+					[ 'Our product', '/our-product/' ],
 					[ 'Careers', '/careers/' ],
 					[ 'Contact', '/contact-us/' ],
 				],

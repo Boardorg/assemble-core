@@ -21,8 +21,6 @@ defined( 'ABSPATH' ) || exit;
  */
 function assemble_redirect_map(): array {
 	$map = [
-		// Replaced by the homepage explorer and /summits/.
-		'/our-product'                                                 => '/',
 		// The CEO bio now lives with the rest of the team.
 		'/aaron-kissel-assemble-ceo'                                   => '/our-team/aaron-kissel/',
 		// Newsletter and Field Notes sign-up pages.

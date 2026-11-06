@@ -41,6 +41,7 @@ function assemble_setup_pages(): array {
 		'assemble/setup_pages',
 		[
 			'about-us'             => 'About us',
+			'our-product'          => 'Our product',
 			'our-team'             => 'Our team',
 			'careers'              => 'Careers',
 			'contact-us'           => 'Contact us',
@@ -134,7 +135,7 @@ const ASSEMBLE_SETUP_PRIMARY_MENU = 'Masthead';
  */
 function assemble_setup_utility_items(): array {
 	$items = [];
-	foreach ( [ 'about-us' => 'About', 'our-team' => 'Our team', 'careers' => 'Careers', 'contact-us' => 'Contact' ] as $path => $title ) {
+	foreach ( [ 'about-us' => 'About', 'our-product' => 'Our product', 'our-team' => 'Our team', 'careers' => 'Careers', 'contact-us' => 'Contact' ] as $path => $title ) {
 		$page    = get_page_by_path( $path );
 		$items[] = $page instanceof WP_Post
 			? [
