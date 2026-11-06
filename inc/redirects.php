@@ -24,11 +24,11 @@ function assemble_redirect_map(): array {
 		// The CEO bio now lives with the rest of the team.
 		'/aaron-kissel-assemble-ceo'                                   => '/our-team/aaron-kissel/',
 		// Newsletter and Field Notes sign-up pages.
-		'/insider'                                                     => '/field-reports/',
-		'/fieldnotes-socialmedia'                                      => '/field-reports/community/socialmedia-org/',
-		'/fieldnotes-supplychain'                                      => '/field-reports/',
+		'/insider'                                                     => '/insights/',
+		'/fieldnotes-socialmedia'                                      => '/insights/community/socialmedia-org/',
+		'/fieldnotes-supplychain'                                      => '/insights/',
 		// A webinar page (October 2026).
-		'/how-mgm-resorts-is-thinking-about-digital-marketing-in-2027' => '/field-reports/',
+		'/how-mgm-resorts-is-thinking-about-digital-marketing-in-2027' => '/insights/',
 		// Prototype leftovers.
 		'/members-2'                                                   => '/',
 		'/user-2'                                                      => '/',

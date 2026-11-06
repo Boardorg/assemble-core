@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Assemble Core
  * Description:       Public-site content model for theassemble.com: Community sales pages (SCF fields), summits (read through the shared engine in Assemble Content), Site Settings, free accounts (sign in, create account, account page, audiences for the Field Report gate, the free-read meter), the team, redirects from the old site's URLs, the noindex guard and the `wp assemble setup` command. Content authored in Contentful lives in Assemble Content instead.
- * Version:           0.12.0
+ * Version:           0.13.0
  * Requires PHP:      8.0
  * Author:            Assemble
  * Text Domain:       assemble-core
@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ASSEMBLE_CORE_VERSION', '0.12.0' );
+define( 'ASSEMBLE_CORE_VERSION', '0.13.0' );
 define( 'ASSEMBLE_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once ASSEMBLE_CORE_DIR . 'inc/environment.php';
@@ -18,6 +18,8 @@ require_once ASSEMBLE_CORE_DIR . 'inc/noindex.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/content-guards.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/site-settings.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/communities.php';
+require_once ASSEMBLE_CORE_DIR . 'inc/insights.php';
+require_once ASSEMBLE_CORE_DIR . 'inc/benchmarks.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/summits.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/team.php';
 require_once ASSEMBLE_CORE_DIR . 'inc/accounts.php';
