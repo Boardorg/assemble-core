@@ -994,7 +994,7 @@
             "label": "Practice with no Communities yet",
             "name": "finder_empty",
             "type": "textarea",
-            "instructions": "Shown for a practice with no Communities (Finance and Legal today). {practice} reads as the practice’s name.",
+            "instructions": "Shown for a practice with no Communities (Finance & Legal today). {practice} reads as the practice’s name.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {

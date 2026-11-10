@@ -12,9 +12,9 @@ function assemble_admin_area_labels(): array {
 	return [
 		'human-resources' => 'Human Resources',
 		'manufacturing'   => 'Supply Chain & Manufacturing',
-		'marketing'       => 'Marketing and Communications',
-		'technology'      => 'Data and Technology',
-		'finance'         => 'Finance and Legal',
+		'marketing'       => 'Marketing & Communications',
+		'technology'      => 'Data & Technology',
+		'finance'         => 'Finance & Legal',
 	];
 }
 
