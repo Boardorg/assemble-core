@@ -89,3 +89,89 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	);
 }
+
+/*
+ * Board.org's Practitioner Summits (Kristen's review, Cale 2026-11-10). They
+ * aren't Executive Platforms events, so EP's API doesn't list them; they're
+ * kept here by hand and join EP's summits through the engine's filters, on
+ * this site only. Update the dates and links each year from board.org.
+ */
+
+/** The Board.org summits, in the engine's stored-summit shape. */
+function assemble_board_summits(): array {
+	$base = [
+		'season'     => '',
+		'agenda_url' => '',
+		'api_url'    => '',
+		'logo_url'   => '',
+		'timezone'   => 'America/New_York',
+		'status'     => 'upcoming',
+		'modified'   => '',
+		'date_text'  => '',
+		'stats'      => [],
+	];
+
+	return [
+		$base + [
+			'code'         => 'tmbps',
+			'short_name'   => 'TMBPS',
+			'title'        => 'Talent Marketing Practitioner Summit',
+			'url'          => 'https://board.org/talent/meetings/practitioner-summit27/',
+			'register_url' => 'https://board.org/board-registration-form/?Group=TMBPS&Event=2027%20Talent%20Marketing%20Practitioner%20Summit',
+			'city'         => 'National Harbor',
+			'state'        => 'MD',
+			'venue'        => '',
+			'start'        => '2027-05-25',
+			'end'          => '2027-05-26',
+			'year'         => 2027,
+		],
+		$base + [
+			'code'         => 'dmcps',
+			'short_name'   => 'DMCPS',
+			'title'        => 'Digital Marketing & Communications Practitioner Summit',
+			'url'          => 'https://board.org/meetings/dmc-practitioner-summit27/',
+			'register_url' => 'https://board.org/board-registration-form/?Group=DMCPS&Event=2027%20Digital%20Marketing%20and%20Communications%20Practitioner%20Summit',
+			'city'         => 'National Harbor',
+			'state'        => 'MD',
+			'venue'        => '',
+			'start'        => '2027-05-25',
+			'end'          => '2027-05-26',
+			'year'         => 2027,
+		],
+	];
+}
+
+add_filter(
+	'ac_summits',
+	static function ( array $summits ): array {
+		$today = wp_date( 'Y-m-d' );
+		foreach ( assemble_board_summits() as $summit ) {
+			if ( $summit['end'] >= $today && ! in_array( $summit['code'], array_column( $summits, 'code' ), true ) ) {
+				$summits[] = $summit;
+			}
+		}
+		usort( $summits, static fn( $a, $b ) => strcmp( (string) $a['start'], (string) $b['start'] ) );
+
+		return $summits;
+	}
+);
+
+add_filter(
+	'ac_summit_extras',
+	static function ( array $extras ): array {
+		$extras['tmbps'] = [
+			'area'        => 'human-resources',
+			'area_label'  => __( 'Human Resources', 'assemble-core' ),
+			'communities' => [ 'talent-marketing' ],
+			'blurb'       => __( 'Talent marketing, employer brand, recruitment marketing, and candidate experience.', 'assemble-core' ),
+		];
+		$extras['dmcps'] = [
+			'area'        => 'marketing',
+			'area_label'  => __( 'Marketing & Communications', 'assemble-core' ),
+			'communities' => [ '*' ],
+			'blurb'       => __( 'Social media, AI search, and digital communications, from the leaders who run the programs.', 'assemble-core' ),
+		];
+
+		return $extras;
+	}
+);

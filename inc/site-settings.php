@@ -70,6 +70,7 @@ function assemble_site_setting_defaults(): array {
 				'heading' => 'Follow',
 				'links'   => [
 					[ 'LinkedIn', 'https://www.linkedin.com/company/assembleleaders/' ],
+					[ 'YouTube', 'https://www.youtube.com/@AssembleLeaders' ],
 				],
 			],
 		],

@@ -40,7 +40,7 @@ function assemble_for_you_chips( int $user_id ): array {
 		$chips[ 'c:' . $slug ] = [
 			'type'  => 'community',
 			'key'   => (string) $slug,
-			'label' => (string) ( $community['short_name'] ?: $community['name'] ),
+			'label' => (string) preg_replace( '/\s+Board$/', '', (string) ( $community['name'] ?: $community['short_name'] ) ),
 			'area'  => $area,
 		];
 	}
