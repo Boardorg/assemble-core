@@ -39,7 +39,7 @@ function assemble_practice_area_keys(): array {
  * An account URL. Sign in, create account and account come from Site Settings,
  * so SSO can point them elsewhere without a deploy.
  *
- * @param string $which    login | register | account | lostpassword | logout
+ * @param string $which    login | register | account | for_you | lostpassword | logout
  * @param string $redirect Where to go afterwards (login and register only).
  */
 function assemble_account_url( string $which, string $redirect = '' ): string {
@@ -48,6 +48,7 @@ function assemble_account_url( string $which, string $redirect = '' ): string {
 		'lostpassword' => 'sign_in_url',
 		'register'     => 'create_account_url',
 		'account'      => 'account_url',
+		'for_you'      => 'for_you_url',
 	];
 
 	if ( 'logout' === $which ) {
@@ -74,7 +75,7 @@ function assemble_account_url( string $which, string $redirect = '' ): string {
 }
 
 /**
- * Which account page this request is for: login, register, account, or ''.
+ * Which account page this request is for: login, register, account, for_you, or ''.
  * Matched on the path of each Site Settings URL, so renaming a page there
  * moves its behaviour with it.
  */
@@ -82,7 +83,7 @@ function assemble_account_page_kind(): string {
 	$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only compared.
 	$path = strtolower( untrailingslashit( (string) wp_parse_url( $uri, PHP_URL_PATH ) ) );
 
-	foreach ( [ 'login' => 'sign_in_url', 'register' => 'create_account_url', 'account' => 'account_url' ] as $kind => $key ) {
+	foreach ( [ 'login' => 'sign_in_url', 'register' => 'create_account_url', 'account' => 'account_url', 'for_you' => 'for_you_url' ] as $kind => $key ) {
 		$url = (string) assemble_site_setting( $key );
 		if ( ! str_starts_with( $url, '/' ) && ! str_starts_with( $url, home_url() ) ) {
 			continue;

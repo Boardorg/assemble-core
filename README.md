@@ -61,6 +61,15 @@ Cale, 2026-11-10: members-only titles are sensitive, so a Field Report or playbo
 
 Tests (local, creates and deletes fixtures): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/members-only-test.php`
 
+## For You (0.15.0)
+
+The signed-in feed from wireframe 8 (`inc/for-you.php`; brief: the hub's `FOR-YOU-HANDOFF.md`). `assemble_for_you( $user_id, [ 'for' => 'c:<slug>'|'a:<area>', 'page' => n ] )` returns the chips (each followed Community, then each followed area with no followed Community), the current chip (a forged one is ignored), and 12 items a page, newest first: Field Reports in followed Communities and Playbooks in followed areas, each with its `reason`. Members-only pieces are already gone (`inc/members-only.php`).
+
+- **URL:** Site Setting `for_you_url` (default `/for-you/`), `assemble_account_url( 'for_you' )`; `wp assemble setup` creates the page. Signed-out visitors go to Sign in; the page is uncacheable and `noindex`.
+- **Landing:** Create account (with no `redirect_to`) goes to `/for-you/?done=created`; Sign in, and a signed-in visit to Sign in or Create account, go to `/for-you/`. Return links (`redirect_to`) still win.
+
+Tests (local, creates and deletes users and fixtures): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/for-you-test.php`
+
 ## The team
 
 One `team` post per person at `/our-team/<slug>/`, with `name`, `position` and `bio` fields and the headshot as the featured image. On the beta (and so at launch) the post type and its fields are defined in Secure Custom Fields' admin; `inc/team.php` registers the same post type only where nothing else has, and `assemble_team_members()` / `assemble_team_member()` read people for the theme with or without the fields plugin. People data stays in WordPress, never in this repo.

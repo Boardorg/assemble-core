@@ -109,6 +109,21 @@
             "placeholder": "/account/"
         },
         {
+            "key": "field_assemble_for_you_url",
+            "label": "“For you” link (signed in)",
+            "name": "for_you_url",
+            "type": "text",
+            "instructions": "Default: /for-you/. The signed-in person's feed from the areas and Communities they follow. New accounts and sign-ins land here.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placeholder": "/for-you/"
+        },
+        {
             "key": "field_assemble_privacy_url",
             "label": "Privacy link (Create account consent line)",
             "name": "privacy_url",
@@ -359,5 +374,5 @@
     "active": true,
     "description": "Strings and links that change without a code deploy. Read by assemble_site_setting(); empty fields use the defaults in assemble-core/inc/site-settings.php.",
     "show_in_rest": 0,
-    "modified": 1791739456
+    "modified": 1794331721
 }

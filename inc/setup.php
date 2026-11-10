@@ -59,7 +59,7 @@ function assemble_setup_pages(): array {
  */
 function assemble_setup_account_pages(): array {
 	$pages = [];
-	foreach ( [ 'sign_in_url' => 'Sign in', 'create_account_url' => 'Create a free account', 'account_url' => 'Your account' ] as $key => $title ) {
+	foreach ( [ 'sign_in_url' => 'Sign in', 'create_account_url' => 'Create a free account', 'account_url' => 'Your account', 'for_you_url' => 'For you' ] as $key => $title ) {
 		$url = (string) assemble_site_setting( $key );
 		if ( str_starts_with( $url, '/' ) ) {
 			$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );

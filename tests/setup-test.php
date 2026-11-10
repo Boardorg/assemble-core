@@ -52,7 +52,7 @@ ast_check( [] === $changed, 'a second run changes nothing' );
 foreach ( array_keys( assemble_setup_pages() + assemble_setup_account_pages() ) as $path ) {
 	ast_check( get_page_by_path( $path ) instanceof WP_Post, "page /{$path}/ exists" );
 }
-ast_check( 3 === count( assemble_setup_account_pages() ), 'three account pages (login, register, account)' );
+ast_check( 4 === count( assemble_setup_account_pages() ), 'four account pages (login, register, account, for-you)' );
 ast_check( [ 'About', 'Our product', 'Our team', 'Careers', 'Contact' ] === wp_list_pluck( assemble_setup_utility_items(), 'title' ), 'utility menu: the company pages in production\'s order' );
 ast_check( ! empty( get_nav_menu_locations()['primary'] ), 'the primary location holds a menu' );
 
