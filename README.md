@@ -50,6 +50,17 @@ Free accounts are ordinary WordPress users (role `subscriber`) until Mark's SSO 
 
 Tests (local, creates and deletes a test user): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/accounts-test.php`
 
+## Members-only pieces stay off the public site (0.14.0)
+
+Cale, 2026-11-10: members-only titles are sensitive, so a Field Report or playbook whose `availableTo` shares no audience with the visitor never appears, not even as a locked card (`inc/members-only.php`).
+
+- **Every front-end query** (`pre_get_posts`, so the feed's `get_posts()` lists too): the homepage, Insights, Community and topic lists, related stories, search, RSS, oEmbed, and the piece's own URL, which 404s. Logged-out visitors and free accounts see Public pieces only; admins, the gate bypass and members (the test-audience stub now, SSO later) see what their audiences allow.
+- **Yoast:** sitemaps list Public pieces only; the public `yoast/v1/get_head` endpoint 404s for a hidden piece's URL.
+- **Not applied** in wp-admin, WP-CLI, cron or the feed's own REST routes (`assemble/v1`, the Contentful webhook), so the sync still sees every post. A piece with no audiences at all is hidden (fails closed).
+- Helpers: `assemble_hidden_piece_ids( $audiences = null )`, `assemble_is_hidden_piece( $id )`; filter `assemble/members_only/applies`.
+
+Tests (local, creates and deletes fixtures): `npx @wordpress/env run cli wp eval-file wp-content/plugins/assemble-core/tests/members-only-test.php`
+
 ## The team
 
 One `team` post per person at `/our-team/<slug>/`, with `name`, `position` and `bio` fields and the headshot as the featured image. On the beta (and so at launch) the post type and its fields are defined in Secure Custom Fields' admin; `inc/team.php` registers the same post type only where nothing else has, and `assemble_team_members()` / `assemble_team_member()` read people for the theme with or without the fields plugin. People data stays in WordPress, never in this repo.
