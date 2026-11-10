@@ -28,6 +28,8 @@ function assemble_site_setting_defaults(): array {
 		'sign_in_url'        => '/login/',
 		'create_account_url' => '/register/',
 		'account_url'        => '/account/',
+		// The signed-in feed (For You); new accounts and sign-ins land here.
+		'for_you_url'        => '/for-you/',
 		// Linked from the Create account consent line.
 		'privacy_url'        => '/policies/',
 		// Where a signed-in free account goes from a members-only report's gate.

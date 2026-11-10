@@ -122,11 +122,11 @@ add_action(
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only.
 		$get_action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
 
-		if ( 'account' === $kind && ! $logged_in ) {
-			assemble_account_go( assemble_account_url( 'login', assemble_account_url( 'account' ) ) );
+		if ( in_array( $kind, [ 'account', 'for_you' ], true ) && ! $logged_in ) {
+			assemble_account_go( assemble_account_url( 'login', assemble_account_url( $kind ) ) );
 		}
 		if ( $logged_in && ( 'register' === $kind || ( 'login' === $kind && 'rp' !== $get_action ) ) ) {
-			assemble_account_go( assemble_account_redirect_param() ?: assemble_account_url( 'account' ) );
+			assemble_account_go( assemble_account_redirect_param() ?: assemble_account_url( 'for_you' ) );
 		}
 		if ( 'login' === $kind && 'rp' === $get_action && empty( $GLOBALS['assemble_account_state'] ) ) {
 			assemble_account_prepare_reset();
@@ -212,7 +212,7 @@ function assemble_account_handle_create(): void {
 	}
 
 	$next = assemble_account_redirect_param();
-	assemble_account_go( $next ? $next : add_query_arg( 'done', 'created', assemble_account_url( 'account' ) ) );
+	assemble_account_go( $next ? $next : add_query_arg( 'done', 'created', assemble_account_url( 'for_you' ) ) );
 }
 
 function assemble_account_handle_signin(): void {
@@ -241,7 +241,7 @@ function assemble_account_handle_signin(): void {
 	}
 
 	$next = assemble_account_redirect_param();
-	assemble_account_go( $next ? $next : assemble_account_url( 'account' ) );
+	assemble_account_go( $next ? $next : assemble_account_url( 'for_you' ) );
 }
 
 function assemble_account_handle_lostpassword(): void {
