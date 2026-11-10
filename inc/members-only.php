@@ -185,6 +185,7 @@ add_filter(
 
 		return $result;
 	},
-	10,
+	// After ACF (10), whose rest_pre_dispatch returns nothing when its REST API is off, dropping an earlier answer.
+	100,
 	3
 );
