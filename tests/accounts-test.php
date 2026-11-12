@@ -136,6 +136,12 @@ aat_check( assemble_mail_allowed( 'tester@example.com' ), 'an allowlisted addres
 aat_check( assemble_mail_allowed( 'Tester+phase7@Example.com' ), 'plus-addresses of it are allowed' );
 aat_check( assemble_mail_allowed( 'Test Person <tester@example.com>' ), 'named addresses are parsed' );
 aat_check( ! assemble_mail_allowed( 'someone@example.com' ), 'other addresses are not' );
+update_option( 'assemble_mail_allowlist', 'tester@example.com,@board.example' );
+aat_check( assemble_mail_allowed( 'Anyone+x@Board.example' ), 'an "@domain" entry allows the whole domain' );
+aat_check( ! assemble_mail_allowed( 'someone@notboard.example' ), 'other domains are not' );
+update_option( 'assemble_mail_allowlist', '*' );
+aat_check( assemble_mail_allowed( 'anyone@anywhere.example' ), '"*" allows everything' );
+update_option( 'assemble_mail_allowlist', "tester@example.com\nother@example.org" );
 $sent = null;
 $spy  = static function ( $short, $atts ) use ( &$sent ) {
 	if ( null !== $short ) {
