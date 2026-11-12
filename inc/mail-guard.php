@@ -7,7 +7,8 @@
  * so a sign-up form there would mail whatever address anyone types. The
  * allowlist is the option `assemble_mail_allowlist` (addresses, one per line or
  * an array), set per site and never in a repo; "name@example.com" also allows
- * "name+anything@example.com". Everything else is dropped and noted in
+ * "name+anything@example.com", "@example.com" allows the whole domain, and "*"
+ * lets all mail through (the beta, for testing). Everything else is dropped and noted in
  * `assemble_mail_held` (recipient, subject, time; the body too on a local site,
  * so set-password links can be read there).
  *
@@ -43,9 +44,13 @@ function assemble_mail_allowed( string $address ): bool {
 	$address = strtolower( trim( $address ) );
 	$base    = (string) preg_replace( '/\+[^@]*@/', '@', $address );
 
-	$allow = assemble_mail_allowlist();
+	$allow  = assemble_mail_allowlist();
+	$domain = strrchr( $base, '@' );
 
-	return in_array( $address, $allow, true ) || in_array( $base, $allow, true );
+	return in_array( '*', $allow, true )
+		|| in_array( $address, $allow, true )
+		|| in_array( $base, $allow, true )
+		|| ( false !== $domain && in_array( $domain, $allow, true ) );
 }
 
 /** Note a dropped message (the last 25). */
