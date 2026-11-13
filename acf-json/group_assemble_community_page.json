@@ -269,6 +269,50 @@
             }
         },
         {
+            "key": "field_assemble_cp_company_count",
+            "label": "Company count",
+            "name": "company_count",
+            "type": "text",
+            "instructions": "Communities index only. As shown, e.g. 750+. Blank hides it.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "index"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_assemble_cp_company_descriptor",
+            "label": "Company count line",
+            "name": "company_descriptor",
+            "type": "text",
+            "instructions": "e.g. member companies",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "==",
+                        "value": "index"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
             "key": "field_assemble_cp_member_functions",
             "label": "Who the members are",
             "name": "member_functions",
@@ -619,6 +663,56 @@
             },
             "ui": 1,
             "default_value": 0
+        },
+        {
+            "key": "field_assemble_cp_fit_heading",
+            "label": "“Is this you?” headline",
+            "name": "fit_heading",
+            "type": "textarea",
+            "instructions": "Blank = the shared one (“The {board} brings together…”). Use when the shared line doesn't fit, e.g. SocialMedia.org.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "!=",
+                        "value": "index"
+                    },
+                    {
+                        "field": "field_assemble_cp_community_type",
+                        "operator": "!=",
+                        "value": "area"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "rows": 2
+        },
+        {
+            "key": "field_assemble_cp_company_group_label",
+            "label": "Organization requirements label",
+            "name": "company_group_label",
+            "type": "text",
+            "instructions": "Blank = “Company requirements”.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_assemble_cp_own_requirements",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
         },
         {
             "key": "field_assemble_cp_impact",
@@ -1222,5 +1316,5 @@
     "active": true,
     "description": "Fields for pages on the Community page template (/communities/…). Read by assemble_community_page_view() in assemble-core/inc/communities.php.",
     "show_in_rest": 0,
-    "modified": 1793075708
+    "modified": 1794550040
 }
