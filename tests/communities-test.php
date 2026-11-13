@@ -40,6 +40,15 @@ $groups = assemble_community_requirement_groups(
 	]
 );
 act_check( 1 === count( $groups ) && 'Company requirements' === $groups[0]['label'], 'requirements group, empty groups dropped' );
+act_check( 'Organization requirements' === assemble_community_requirement_groups( [ [ 'group' => 'company', 'title' => 'Healthcare organization' ] ], 'Organization requirements' )[0]['label'], 'the organization card takes a page’s own label' );
+
+// The apply-to-join form preselects the Board in board.org's join form.
+$join = assemble_join_form( 'aeo' );
+act_check( is_array( $join ) && 'AEO' === $join['value'] && 'mql_community_radio' === $join['field'] && '' !== $join['form'], 'the join form names the AEO option' );
+act_check( '' === ( assemble_join_form( 'no-such-community' )['value'] ?? 'x' ), 'an unknown Community gets the form with nothing preselected' );
+add_filter( 'assemble/join_form', '__return_null' );
+act_check( null === assemble_join_form( 'aeo' ), 'the join form can be switched off' );
+remove_filter( 'assemble/join_form', '__return_null' );
 
 // Sessions need a title and a date.
 act_check( 1 === count( assemble_community_session_rows( [ [ 'date' => '2030-01-01 12:00:00', 'title' => 'T' ], [ 'date' => '', 'title' => 'No date' ] ] ) ), 'sessions need a date and title' );

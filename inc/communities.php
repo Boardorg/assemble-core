@@ -188,10 +188,10 @@ function assemble_community_pillar_rows( $rows ): array {
  *
  * @return array<int,array{label:string,items:array<int,array{0:string,1:string}>}>
  */
-function assemble_community_requirement_groups( $rows ): array {
+function assemble_community_requirement_groups( $rows, string $company_label = '' ): array {
 	$groups = [
 		'individual' => [ 'label' => 'Individual requirements', 'items' => [] ],
-		'company'    => [ 'label' => 'Company requirements', 'items' => [] ],
+		'company'    => [ 'label' => '' !== trim( $company_label ) ? trim( $company_label ) : 'Company requirements', 'items' => [] ],
 	];
 
 	foreach ( (array) $rows as $row ) {
@@ -327,7 +327,8 @@ function assemble_community_page_view( WP_Post $post ): ?array {
 	$article = 'an' === assemble_community_field( 'community_article', $id ) ? 'an' : 'a';
 
 	$impact = assemble_community_field( 'own_impact', $id ) ? assemble_community_field( 'impact', $id ) : assemble_community_default( 'impact' );
-	$reqs   = assemble_community_field( 'own_requirements', $id ) ? assemble_community_field( 'requirements', $id ) : assemble_community_default( 'requirements' );
+	$own    = (bool) assemble_community_field( 'own_requirements', $id );
+	$reqs   = $own ? assemble_community_field( 'requirements', $id ) : assemble_community_default( 'requirements' );
 
 	$view += [
 		'name'           => (string) $community['name'],
@@ -360,10 +361,11 @@ function assemble_community_page_view( WP_Post $post ): ?array {
 		],
 		'fit'            => [
 			'eyebrow' => (string) assemble_community_default( 'fit_eyebrow' ),
-			'heading' => (string) assemble_community_default( 'fit_heading' ),
+			'heading' => (string) ( assemble_community_field( 'fit_heading', $id ) ?: assemble_community_default( 'fit_heading' ) ),
 			'lead'    => (string) assemble_community_default( 'fit_lead' ),
-			'groups'  => assemble_community_requirement_groups( $reqs ),
+			'groups'  => assemble_community_requirement_groups( $reqs, $own ? (string) assemble_community_field( 'company_group_label', $id ) : '' ),
 		],
+		'join'           => assemble_join_form( (string) $community['slug'] ),
 		'company'        => [
 			'eyebrow' => (string) assemble_community_default( 'company_eyebrow' ),
 			'heading' => (string) assemble_community_default( 'company_heading' ),
@@ -396,6 +398,10 @@ function assemble_community_index_view( array $view, WP_Post $post ): array {
 	}
 
 	$view['closing']['cta'] = (string) assemble_community_field( 'closing_button', $id ) ?: 'Talk to us';
+	$view['members']['companies'] = [
+		'count'      => (string) assemble_community_field( 'company_count', $id ),
+		'descriptor' => (string) assemble_community_field( 'company_descriptor', $id ),
+	];
 
 	return $view + [
 		'name'     => get_the_title( $post ),
@@ -451,7 +457,7 @@ function assemble_community_is_network( string $name ): bool {
  * key order), Boards before Councils, each joined to its published Community
  * page when it has one:
  *   slug, name, label (no " Board"), area, kind (board|council), boilerplate,
- *   audience, logo, page: null | { url, one_liner, member_count, session }.
+ *   audience, logo, page: null | { url, one_liner, member_count, logos, session }.
  * Every practice key is present, empty when it has no Communities yet.
  * Networks (e.g. "HR Network") are left out.
  *
@@ -491,10 +497,20 @@ function assemble_community_directory(): array {
 		$sessions = array_values( array_filter( $sessions, static fn ( $s ) => strtotime( $s['date'] ) >= strtotime( wp_date( 'Y-m-d' ) ) ) );
 		usort( $sessions, static fn ( $a, $b ) => strcmp( $a['date'], $b['date'] ) );
 
+		$logos = [];
+		foreach ( (array) assemble_community_field( 'member_logos', $id ) as $row ) {
+			$company = trim( (string) ( $row['company'] ?? '' ) );
+			if ( '' !== $company ) {
+				$image   = assemble_community_image( $row['logo'] ?? 0, 'medium' );
+				$logos[] = [ 'name' => $company, 'url' => $image['url'] ?? '' ];
+			}
+		}
+
 		$pages[ $slug ] = [
 			'url'          => (string) get_permalink( $id ),
 			'one_liner'    => (string) assemble_community_field( 'community_one_liner', $id ),
 			'member_count' => (string) assemble_community_field( 'member_count', $id ),
+			'logos'        => $logos,
 			'session'      => $sessions[0] ?? null,
 		];
 	}
@@ -587,4 +603,50 @@ add_action(
 
 foreach ( [ 'group_assemble_community_page', 'group_assemble_community_defaults' ] as $assemble_group ) {
 	add_filter( 'acf/settings/save_json/key=' . $assemble_group, static fn (): string => ASSEMBLE_CORE_DIR . 'acf-json' );
+}
+
+/**
+ * The apply-to-join form for a Board page: the same HubSpot form board.org's
+ * /join/ page embeds ("Apply to join form (new)"), with the Board's option in
+ * its "group you're most interested in" radio, so the theme can preselect it.
+ * The IDs are public (they're in board.org's page source). Filter
+ * `assemble/join_form` to change the form or the option map; return null to
+ * fall back to the membership_url button.
+ *
+ * @return array{portal:string,form:string,region:string,field:string,value:string}|null
+ */
+function assemble_join_form( string $slug ): ?array {
+	// Community slug => the radio's option value (HubSpot internal values, not labels).
+	$values = [
+		'aeo'                    => 'AEO',
+		'culture-experience'     => 'Employee Experience Board',
+		'data-ai-strategy'       => 'DAIS',
+		'data-privacy'           => 'Data Privacy Board',
+		'dei'                    => 'DEI Board',
+		'esg-csr'                => 'ESG & CSR Board',
+		'learning-development'   => 'LDB',
+		'manufacturing'          => 'MFB',
+		'socialmedia-org'        => 'SocialMedia.org',
+		'socialmedia-org-health' => 'SocialMedia.org Health',
+		'supply-chain'           => 'Supply Chain Planning & Logistics Board',
+		'talent-marketing'       => 'Talent Marketing Board',
+	];
+
+	$form = [
+		'portal' => '7001486',
+		'form'   => '37a7f2a4-d71c-4138-94b2-ad3ae4e7d926',
+		'region' => 'na1',
+		'field'  => 'mql_community_radio',
+		'value'  => $values[ $slug ] ?? '',
+	];
+
+	/**
+	 * Filter the apply-to-join form for a Community.
+	 *
+	 * @param array|null $form
+	 * @param string     $slug
+	 */
+	$form = apply_filters( 'assemble/join_form', $form, $slug );
+
+	return is_array( $form ) && ! empty( $form['form'] ) ? $form : null;
 }
