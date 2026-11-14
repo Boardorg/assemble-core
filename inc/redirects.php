@@ -34,6 +34,13 @@ function assemble_redirect_map(): array {
 		'/user-2'                                                      => '/',
 		'/account-2'                                                   => '/',
 		'/redirection-for-non-registered-users'                        => '/',
+		// Beta-only placeholder pages with no content (SEO audit, 2026-11-13).
+		'/boards'                                                      => '/communities/',
+		'/councils'                                                    => '/communities/',
+		'/network'                                                     => '/communities/',
+		'/blog'                                                        => '/insights/',
+		'/peer-intelligence'                                           => '/insights/',
+		'/home'                                                        => '/',
 		// Ultimate Member pages (Phase 7): the new account flow.
 		'/password-reset'                                              => assemble_account_url( 'lostpassword' ),
 		'/account-confirmation'                                        => assemble_account_url( 'account' ),
