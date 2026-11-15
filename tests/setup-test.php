@@ -35,6 +35,9 @@ ast_check( '' === assemble_redirect_target( '/login/' ), 'the rebuilt Sign in pa
 ast_check( str_contains( assemble_redirect_target( '/password-reset/' ), 'action=lostpassword' ), 'the old password reset goes to the Sign in page\'s reset state' );
 ast_check( assemble_account_url( 'account' ) === assemble_redirect_target( '/members/' ), 'old member URLs go to the Account page' );
 ast_check( '' === assemble_redirect_target( '/logout/' ), '/logout/ is a handler, not a redirect' );
+ast_check( [ '/about-us/', 302 ] === assemble_redirect_rule( '/peer-intelligence/' ), '/peer-intelligence/ is a temporary redirect until the page is built' );
+ast_check( [ '/communities/', 301 ] === assemble_redirect_rule( '/boards/' ), 'plain map entries are permanent' );
+ast_check( '/benchmark/' === assemble_redirect_target( '/survey-button/' ), 'old benchmark buttons go to /benchmark/' );
 
 add_filter( 'assemble/redirects', static fn ( $map ) => $map + [ '/old-test' => '/new-test/' ] );
 ast_check( '/new-test/' === assemble_redirect_target( '/old-test/' ), 'the map is filterable' );

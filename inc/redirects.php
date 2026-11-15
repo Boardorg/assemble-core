@@ -15,9 +15,10 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Old path => new site-relative path or absolute URL.
+ * Old path => new site-relative path or absolute URL, or [ target, status ]
+ * for a temporary (302) redirect.
  *
- * @return array<string,string>
+ * @return array<string,string|array{0:string,1:int}>
  */
 function assemble_redirect_map(): array {
 	$map = [
@@ -26,9 +27,25 @@ function assemble_redirect_map(): array {
 		// Newsletter and Field Notes sign-up pages.
 		'/insider'                                                     => '/insights/',
 		'/fieldnotes-socialmedia'                                      => '/insights/community/socialmedia-org/',
-		'/fieldnotes-supplychain'                                      => '/insights/',
-		// A webinar page (October 2026).
-		'/how-mgm-resorts-is-thinking-about-digital-marketing-in-2027' => '/insights/',
+		'/fieldnotes-supplychain'                                      => '/insights/community/supply-chain/',
+		// A webinar page (October 2026); no search traffic (David's SEO review, 2026-11-15).
+		'/how-mgm-resorts-is-thinking-about-digital-marketing-in-2027' => '/insights/community/socialmedia-org/',
+		// Former staff bios that still get search clicks.
+		'/our-team/jyotika-luthra'                                     => '/our-team/',
+		'/our-team/greg-ferguson'                                      => '/our-team/',
+		// Old Board pages under Our Product, linked from other sites.
+		'/our-product/esg-csr-board'                                   => '/communities/esg-csr/',
+		'/our-product/supply-chain-board'                              => '/communities/supply-chain/',
+		'/our-product/talent-marketing-board'                          => '/communities/talent-marketing/',
+		'/our-product/dei-board'                                       => '/communities/dei/',
+		'/our-product/data-privacy-board'                              => '/communities/data-privacy/',
+		'/our-product/employee-experience-board'                       => '/communities/culture-experience/',
+		'/our-product/enterprise-data-strategy-board'                  => '/communities/data-ai-strategy/',
+		'/our-product/socialmedia-org'                                 => '/communities/socialmedia-org/',
+		'/our-product/socialmedia-org-health'                          => '/communities/socialmedia-org-health/',
+		// Old benchmark button pages: benchmark emails may still link here (Cale, 2026-11-15).
+		'/home-with-powerbi-report-button'                             => '/benchmark/',
+		'/survey-button'                                               => '/benchmark/',
 		// Prototype leftovers.
 		'/members-2'                                                   => '/',
 		'/user-2'                                                      => '/',
@@ -39,7 +56,8 @@ function assemble_redirect_map(): array {
 		'/councils'                                                    => '/communities/',
 		'/network'                                                     => '/communities/',
 		'/blog'                                                        => '/insights/',
-		'/peer-intelligence'                                           => '/insights/',
+		// A planned page: a temporary redirect until it's built (Cale, 2026-11-15).
+		'/peer-intelligence'                                           => [ '/about-us/', 302 ],
 		'/home'                                                        => '/',
 		// Ultimate Member pages (Phase 7): the new account flow.
 		'/password-reset'                                              => assemble_account_url( 'lostpassword' ),
@@ -60,18 +78,27 @@ function assemble_redirect_map(): array {
 }
 
 /**
- * Where a request path should go, or '' to leave it alone.
+ * Where a request path should go and with which status, or [ '', 0 ] to leave it alone.
+ *
+ * @return array{0:string,1:int}
  */
-function assemble_redirect_target( string $path ): string {
+function assemble_redirect_rule( string $path ): array {
 	$key = strtolower( untrailingslashit( '/' . ltrim( $path, '/' ) ) );
 
 	foreach ( assemble_redirect_map() as $from => $to ) {
 		if ( strtolower( untrailingslashit( (string) $from ) ) === $key && '' !== $key ) {
-			return (string) $to;
+			return is_array( $to ) ? [ (string) $to[0], (int) ( $to[1] ?? 301 ) ] : [ (string) $to, 301 ];
 		}
 	}
 
-	return '';
+	return [ '', 0 ];
+}
+
+/**
+ * Where a request path should go, or '' to leave it alone.
+ */
+function assemble_redirect_target( string $path ): string {
+	return assemble_redirect_rule( $path )[0];
 }
 
 /*
@@ -105,7 +132,7 @@ add_action(
 			$url .= ( str_contains( $url, '?' ) ? '&' : '?' ) . $query;
 		}
 
-		wp_safe_redirect( $url, 301, 'Assemble Core' );
+		wp_safe_redirect( $url, $status, 'Assemble Core' );
 		exit;
 	},
 	0
@@ -116,7 +143,7 @@ add_filter(
 	'allowed_redirect_hosts',
 	static function ( array $hosts ): array {
 		foreach ( assemble_redirect_map() as $to ) {
-			$host = wp_parse_url( (string) $to, PHP_URL_HOST );
+			$host = wp_parse_url( (string) ( is_array( $to ) ? $to[0] : $to ), PHP_URL_HOST );
 			if ( $host ) {
 				$hosts[] = $host;
 			}
