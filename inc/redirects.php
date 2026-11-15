@@ -121,7 +121,7 @@ add_action(
 			$path = substr( $path, strlen( $home_path ) );
 		}
 
-		$target = assemble_redirect_target( $path );
+		[ $target, $status ] = assemble_redirect_rule( $path );
 		if ( '' === $target ) {
 			return;
 		}
