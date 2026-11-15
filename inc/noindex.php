@@ -38,3 +38,32 @@ if ( ! assemble_is_production_host() ) {
 		PHP_INT_MAX
 	);
 }
+
+/*
+ * Production robots.txt (David's SEO review, Appendix A, 2026-11-13). Short on
+ * purpose: noindexed pages stay crawlable so Google can see the noindex, AI
+ * crawlers are allowed, and internal search results are blocked. Served from
+ * here so it travels with the launch copy; no file in the site root.
+ */
+if ( assemble_is_production_host() ) {
+	add_filter(
+		'robots_txt',
+		static function (): string {
+			return implode(
+				"\n",
+				[
+					'# ' . home_url( '/robots.txt' ),
+					'User-agent: *',
+					'Disallow: /wp-admin/',
+					'Allow: /wp-admin/admin-ajax.php',
+					'Disallow: /?s=',
+					'Disallow: /*?s=',
+					'',
+					'Sitemap: ' . home_url( '/sitemap_index.xml' ),
+					'',
+				]
+			);
+		},
+		PHP_INT_MAX
+	);
+}
