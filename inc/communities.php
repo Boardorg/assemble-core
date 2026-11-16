@@ -49,7 +49,7 @@ function assemble_community_defaults(): array {
 		'included_eyebrow'   => 'What’s included',
 		'fit_eyebrow'        => 'Is this you?',
 		'company_eyebrow'    => 'You’re in good company',
-		'challenges_heading' => 'The challenges our {field} members are working through now',
+		'challenges_heading' => 'The challenges our {field} leaders are working through now',
 		'apply_label'        => 'Apply to join the {board}',
 	];
 }
@@ -254,6 +254,31 @@ function assemble_community_session_rows( $rows ): array {
 }
 
 /**
+ * A Community page's member strip: [ name, url ] per company row. Left empty
+ * under 4 companies (a strip of one or two looks thin: Cale, 2026-11-15) and
+ * always for the DEI Board, which never names member companies. Who may be
+ * named at all is decided upstream: Salesforce Public Mention = OK only.
+ *
+ * @return array<int,array{name:string,url:string}>
+ */
+function assemble_community_member_logos( int $id ): array {
+	if ( 'dei' === (string) assemble_community_field( 'community_slug', $id ) ) {
+		return [];
+	}
+
+	$logos = [];
+	foreach ( (array) assemble_community_field( 'member_logos', $id ) as $row ) {
+		$company = trim( (string) ( $row['company'] ?? '' ) );
+		if ( '' !== $company ) {
+			$image   = assemble_community_image( $row['logo'] ?? 0, 'medium' );
+			$logos[] = [ 'name' => $company, 'url' => $image['url'] ?? '' ];
+		}
+	}
+
+	return count( $logos ) >= 4 ? $logos : [];
+}
+
+/**
  * The view model for a Community page, or null when the page isn't one (or
  * names no Community the directory knows).
  *
@@ -290,14 +315,7 @@ function assemble_community_page_view( WP_Post $post ): ?array {
 		],
 	];
 
-	$logos = [];
-	foreach ( (array) assemble_community_field( 'member_logos', $id ) as $row ) {
-		$company = trim( (string) ( $row['company'] ?? '' ) );
-		if ( '' !== $company ) {
-			$image   = assemble_community_image( $row['logo'] ?? 0, 'medium' );
-			$logos[] = [ 'name' => $company, 'url' => $image['url'] ?? '' ];
-		}
-	}
+	$logos = assemble_community_member_logos( $id );
 	$view['members'] = [
 		'count'      => (string) assemble_community_field( 'member_count', $id ),
 		'descriptor' => (string) assemble_community_field( 'member_descriptor', $id ),
@@ -497,14 +515,7 @@ function assemble_community_directory(): array {
 		$sessions = array_values( array_filter( $sessions, static fn ( $s ) => strtotime( $s['date'] ) >= strtotime( wp_date( 'Y-m-d' ) ) ) );
 		usort( $sessions, static fn ( $a, $b ) => strcmp( $a['date'], $b['date'] ) );
 
-		$logos = [];
-		foreach ( (array) assemble_community_field( 'member_logos', $id ) as $row ) {
-			$company = trim( (string) ( $row['company'] ?? '' ) );
-			if ( '' !== $company ) {
-				$image   = assemble_community_image( $row['logo'] ?? 0, 'medium' );
-				$logos[] = [ 'name' => $company, 'url' => $image['url'] ?? '' ];
-			}
-		}
+		$logos = assemble_community_member_logos( $id );
 
 		$pages[ $slug ] = [
 			'url'          => (string) get_permalink( $id ),
