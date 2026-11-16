@@ -65,7 +65,8 @@ function assemble_redirect_map(): array {
 		'/account-confirmation'                                        => assemble_account_url( 'account' ),
 		'/user'                                                        => assemble_account_url( 'account' ),
 		'/members'                                                     => assemble_account_url( 'account' ),
-		'/networking-profile'                                          => assemble_account_url( 'account' ),
+		// /networking-profile/ is not redirected: it's the live Gravity Forms summit
+		// networking form (page 2132), carried over from production at launch.
 		// The old benchmark "My report" is handled on the benchmark site now (Cale, 2026-10-11).
 		'/my-report'                                                   => (string) assemble_site_setting( 'benchmark_url' ),
 	];
