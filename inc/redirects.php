@@ -33,6 +33,7 @@ function assemble_redirect_map(): array {
 		// Former staff bios that still get search clicks.
 		'/our-team/jyotika-luthra'                                     => '/our-team/',
 		'/our-team/greg-ferguson'                                      => '/our-team/',
+		'/our-team/jackie-owens'                                       => '/our-team/', // Kristen, 2026-11-13.
 		// Old Board pages under Our Product, linked from other sites.
 		'/our-product/esg-csr-board'                                   => '/communities/esg-csr/',
 		'/our-product/supply-chain-board'                              => '/communities/supply-chain/',
