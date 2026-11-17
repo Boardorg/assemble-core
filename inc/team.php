@@ -5,7 +5,8 @@
  *
  * On the beta (and so at launch) the post type and its "Team Member Info" fields
  * (name, position, bio) were defined in Secure Custom Fields' admin, so they live
- * in the database. This file registers the same post type only where nothing
+ * in the database, plus `linkedin` (a URL field, 2026-11-17). This file
+ * registers the same post type only where nothing
  * else has (a fresh local site), and gives templates one reader that works with
  * or without the fields plugin.
  */
@@ -50,7 +51,7 @@ add_action(
 /**
  * One person, as templates read them.
  *
- * @return array{id:int,name:string,position:string,bio:string,image_id:int,url:string}
+ * @return array{id:int,name:string,position:string,bio:string,linkedin:string,image_id:int,url:string}
  */
 function assemble_team_member( WP_Post $post ): array {
 	$name = trim( (string) get_post_meta( $post->ID, 'name', true ) );
@@ -60,9 +61,26 @@ function assemble_team_member( WP_Post $post ): array {
 		'name'     => '' !== $name ? $name : get_the_title( $post ),
 		'position' => trim( (string) get_post_meta( $post->ID, 'position', true ) ),
 		'bio'      => trim( (string) get_post_meta( $post->ID, 'bio', true ) ),
+		'linkedin' => assemble_team_linkedin_url( (string) get_post_meta( $post->ID, 'linkedin', true ) ),
 		'image_id' => (int) get_post_thumbnail_id( $post ),
 		'url'      => (string) get_permalink( $post ),
 	];
+}
+
+/**
+ * A LinkedIn profile URL, or '' when the value isn't one (Salesforce's LinkedIn
+ * fields also hold Calendly links and LinkedIn's own "edit profile" page).
+ */
+function assemble_team_linkedin_url( string $url ): string {
+	$url  = trim( $url );
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+
+	if ( ! in_array( $host, [ 'linkedin.com', 'www.linkedin.com' ], true ) || ! preg_match( '#^/in/[^/]+/?$#', $path ) ) {
+		return '';
+	}
+
+	return 'https://www.linkedin.com' . untrailingslashit( $path ) . '/';
 }
 
 /**
